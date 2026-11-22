@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { db, getDbPool } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "@/actions/logs";
 
@@ -41,33 +41,25 @@ export interface UpdateAutoInput {
 }
 
 /**
- * Alle Fahrzeuge abrufen
+ * Hilfsfunktion: Konvertiert DB-Zeilen in AutoItem
  */
-export async function getAutos(): Promise<AutoItem[]> {
-  try {
-    const list = await db.auto.findMany({
-      orderBy: [{ name: "asc" }],
-    });
-    return list;
-  } catch (error) {
-    console.warn("Hinweis: Fehler beim Laden der Autos aus der Datenbank:", error);
-    return [];
-  }
-}
-
-/**
- * Einzelnes Fahrzeug anhand der ID abrufen
- */
-export async function getAutoById(id: number): Promise<AutoItem | null> {
-  try {
-    const item = await db.auto.findUnique({
-      where: { id },
-    });
-    return item;
-  } catch (error) {
-    console.error("Fehler beim Abrufen des Autos:", error);
-    return null;
-  }
+function mapRowToAuto(row: any): AutoItem {
+  return {
+    id: row.id,
+    name: row.name,
+    kennzeichen: row.kennzeichen ?? null,
+    modell: row.modell ?? null,
+    defekte: row.defekte ?? null,
+    tuevTermin: row.tuevTermin ? new Date(row.tuevTermin) : null,
+    anmerkungen: row.anmerkungen ?? null,
+    kilometerstand:
+      row.kilometerstand !== null && row.kilometerstand !== undefined
+        ? Number(row.kilometerstand)
+        : null,
+    status: row.status || "BEREIT",
+    createdAt: new Date(row.createdAt),
+    updatedAt: new Date(row.updatedAt),
+  };
 }
 
 /**
@@ -78,6 +70,55 @@ function parseTuevDate(val: string | Date | null | undefined): Date | null {
   if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
   const parsed = new Date(val);
   return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
+ * Alle Fahrzeuge abrufen
+ */
+export async function getAutos(): Promise<AutoItem[]> {
+  try {
+    if ((db as any)?.auto?.findMany) {
+      const list = await db.auto.findMany({
+        orderBy: [{ name: "asc" }],
+      });
+      return list;
+    }
+  } catch (error) {
+    console.warn("Hinweis: Prisma db.auto noch nicht verfügbar, verwende Fallback-Verbindung:", error);
+  }
+
+  // Direkte PostgreSQL-Fallback-Abfrage
+  try {
+    const pool = getDbPool();
+    const res = await pool.query('SELECT * FROM "Auto" ORDER BY "name" ASC');
+    return res.rows.map(mapRowToAuto);
+  } catch (err) {
+    console.error("Fehler beim Laden der Fahrzeuge aus Postgres:", err);
+    return [];
+  }
+}
+
+/**
+ * Einzelnes Fahrzeug anhand der ID abrufen
+ */
+export async function getAutoById(id: number): Promise<AutoItem | null> {
+  try {
+    if ((db as any)?.auto?.findUnique) {
+      const item = await db.auto.findUnique({
+        where: { id },
+      });
+      return item;
+    }
+  } catch {}
+
+  try {
+    const pool = getDbPool();
+    const res = await pool.query('SELECT * FROM "Auto" WHERE id = $1', [id]);
+    return res.rows[0] ? mapRowToAuto(res.rows[0]) : null;
+  } catch (err) {
+    console.error("Fehler beim Abrufen des Autos:", err);
+    return null;
+  }
 }
 
 /**
@@ -94,23 +135,53 @@ export async function createAuto(input: CreateAutoInput): Promise<{
   }
 
   const parsedTuev = parseTuevDate(input.tuevTermin);
-  const km = input.kilometerstand !== undefined && input.kilometerstand !== null && !isNaN(Number(input.kilometerstand))
-    ? Math.max(0, Math.floor(Number(input.kilometerstand)))
-    : null;
+  const km =
+    input.kilometerstand !== undefined &&
+    input.kilometerstand !== null &&
+    !isNaN(Number(input.kilometerstand))
+      ? Math.max(0, Math.floor(Number(input.kilometerstand)))
+      : null;
+
+  const vehicleStatus = input.status?.trim() || (input.defekte?.trim() ? "DEFEKT" : "BEREIT");
 
   try {
-    const newAuto = await db.auto.create({
-      data: {
-        name: trimmedName,
-        kennzeichen: input.kennzeichen?.trim() || null,
-        modell: input.modell?.trim() || null,
-        defekte: input.defekte?.trim() || null,
-        tuevTermin: parsedTuev,
-        anmerkungen: input.anmerkungen?.trim() || null,
-        kilometerstand: km,
-        status: input.status?.trim() || (input.defekte?.trim() ? "DEFEKT" : "BEREIT"),
-      },
-    });
+    let newAuto: AutoItem;
+
+    if ((db as any)?.auto?.create) {
+      newAuto = await db.auto.create({
+        data: {
+          name: trimmedName,
+          kennzeichen: input.kennzeichen?.trim() || null,
+          modell: input.modell?.trim() || null,
+          defekte: input.defekte?.trim() || null,
+          tuevTermin: parsedTuev,
+          anmerkungen: input.anmerkungen?.trim() || null,
+          kilometerstand: km,
+          status: vehicleStatus,
+        },
+      });
+    } else {
+      // Robuster direkter SQL-Insert (falls laufender Server noch alten PrismaClient im Speicher hält)
+      const pool = getDbPool();
+      const insertSql = `
+        INSERT INTO "Auto" 
+          ("name", "kennzeichen", "modell", "defekte", "tuevTermin", "anmerkungen", "kilometerstand", "status", "createdAt", "updatedAt")
+        VALUES 
+          ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+        RETURNING *;
+      `;
+      const res = await pool.query(insertSql, [
+        trimmedName,
+        input.kennzeichen?.trim() || null,
+        input.modell?.trim() || null,
+        input.defekte?.trim() || null,
+        parsedTuev,
+        input.anmerkungen?.trim() || null,
+        km,
+        vehicleStatus,
+      ]);
+      newAuto = mapRowToAuto(res.rows[0]);
+    }
 
     await logActivity({
       bereich: "OFFICE",
@@ -143,29 +214,71 @@ export async function updateAuto(
   }
 
   const parsedTuev = parseTuevDate(input.tuevTermin);
-  const km = input.kilometerstand !== undefined && input.kilometerstand !== null && !isNaN(Number(input.kilometerstand))
-    ? Math.max(0, Math.floor(Number(input.kilometerstand)))
-    : null;
+  const km =
+    input.kilometerstand !== undefined &&
+    input.kilometerstand !== null &&
+    !isNaN(Number(input.kilometerstand))
+      ? Math.max(0, Math.floor(Number(input.kilometerstand)))
+      : null;
 
   try {
-    const existing = await db.auto.findUnique({ where: { id } });
-    if (!existing) {
-      return { success: false, error: "Fahrzeug wurde nicht gefunden." };
-    }
+    let updated: AutoItem;
 
-    const updated = await db.auto.update({
-      where: { id },
-      data: {
-        name: trimmedName,
-        kennzeichen: input.kennzeichen?.trim() || null,
-        modell: input.modell?.trim() || null,
-        defekte: input.defekte?.trim() || null,
-        tuevTermin: parsedTuev,
-        anmerkungen: input.anmerkungen?.trim() || null,
-        kilometerstand: km,
-        status: input.status?.trim() || existing.status,
-      },
-    });
+    if ((db as any)?.auto?.update) {
+      const existing = await db.auto.findUnique({ where: { id } });
+      if (!existing) {
+        return { success: false, error: "Fahrzeug wurde nicht gefunden." };
+      }
+
+      updated = await db.auto.update({
+        where: { id },
+        data: {
+          name: trimmedName,
+          kennzeichen: input.kennzeichen?.trim() || null,
+          modell: input.modell?.trim() || null,
+          defekte: input.defekte?.trim() || null,
+          tuevTermin: parsedTuev,
+          anmerkungen: input.anmerkungen?.trim() || null,
+          kilometerstand: km,
+          status: input.status?.trim() || existing.status,
+        },
+      });
+    } else {
+      const pool = getDbPool();
+      const existingRes = await pool.query('SELECT * FROM "Auto" WHERE id = $1', [id]);
+      if (!existingRes.rows[0]) {
+        return { success: false, error: "Fahrzeug wurde nicht gefunden." };
+      }
+      const existing = existingRes.rows[0];
+
+      const updateSql = `
+        UPDATE "Auto"
+        SET 
+          "name" = $1,
+          "kennzeichen" = $2,
+          "modell" = $3,
+          "defekte" = $4,
+          "tuevTermin" = $5,
+          "anmerkungen" = $6,
+          "kilometerstand" = $7,
+          "status" = $8,
+          "updatedAt" = NOW()
+        WHERE id = $9
+        RETURNING *;
+      `;
+      const res = await pool.query(updateSql, [
+        trimmedName,
+        input.kennzeichen?.trim() || null,
+        input.modell?.trim() || null,
+        input.defekte?.trim() || null,
+        parsedTuev,
+        input.anmerkungen?.trim() || null,
+        km,
+        input.status?.trim() || existing.status,
+        id,
+      ]);
+      updated = mapRowToAuto(res.rows[0]);
+    }
 
     await logActivity({
       bereich: "OFFICE",
@@ -190,19 +303,32 @@ export async function updateAuto(
  */
 export async function deleteAuto(id: number): Promise<{ success: boolean; error?: string }> {
   try {
-    const existing = await db.auto.findUnique({ where: { id } });
-    if (!existing) {
-      return { success: false, error: "Fahrzeug wurde nicht gefunden." };
-    }
+    let carName = "Fahrzeug";
+    let carPlate = "";
 
-    await db.auto.delete({
-      where: { id },
-    });
+    if ((db as any)?.auto?.findUnique) {
+      const existing = await db.auto.findUnique({ where: { id } });
+      if (!existing) {
+        return { success: false, error: "Fahrzeug wurde nicht gefunden." };
+      }
+      carName = existing.name;
+      carPlate = existing.kennzeichen ? ` (${existing.kennzeichen})` : "";
+      await db.auto.delete({ where: { id } });
+    } else {
+      const pool = getDbPool();
+      const existing = await pool.query('SELECT * FROM "Auto" WHERE id = $1', [id]);
+      if (!existing.rows[0]) {
+        return { success: false, error: "Fahrzeug wurde nicht gefunden." };
+      }
+      carName = existing.rows[0].name;
+      carPlate = existing.rows[0].kennzeichen ? ` (${existing.rows[0].kennzeichen})` : "";
+      await pool.query('DELETE FROM "Auto" WHERE id = $1', [id]);
+    }
 
     await logActivity({
       bereich: "OFFICE",
       aktion: "AUTO_DELETE",
-      beschreibung: `Fahrzeug gelöscht: "${existing.name}"${existing.kennzeichen ? ` (${existing.kennzeichen})` : ""}.`,
+      beschreibung: `Fahrzeug gelöscht: "${carName}"${carPlate}.`,
     });
 
     revalidatePath("/office");
@@ -227,30 +353,43 @@ export async function seedSampleAutos(): Promise<{ success: boolean; count: numb
     const dueSoon = new Date();
     dueSoon.setDate(dueSoon.getDate() + 35); // in 35 Tagen fällig
 
-    await db.auto.createMany({
-      data: [
-        {
-          name: "VW Caddy 1 (Montage)",
-          kennzeichen: "B-LL 101",
-          modell: "Volkswagen Caddy 2.0 TDI",
-          defekte: null,
-          tuevTermin: nextYear,
-          anmerkungen: "Schlüssel liegt im Büroschrank Fach 1. Sommerreifen montiert.",
-          kilometerstand: 89400,
-          status: "BEREIT",
-        },
-        {
-          name: "Sprinter Werkstattwagen",
-          kennzeichen: "B-LL 202",
-          modell: "Mercedes-Benz Sprinter 316 CDI",
-          defekte: "Blinker hinten rechts defekt (Birne tauschen), Scheibenwischer vorne verschlissen",
-          tuevTermin: dueSoon,
-          anmerkungen: "Große Werkbank im Heck montiert. Tankkarte im Handschuhfach.",
-          kilometerstand: 148200,
-          status: "DEFEKT",
-        },
-      ],
-    });
+    if ((db as any)?.auto?.createMany) {
+      await db.auto.createMany({
+        data: [
+          {
+            name: "VW Caddy 1 (Montage)",
+            kennzeichen: "B-LL 101",
+            modell: "Volkswagen Caddy 2.0 TDI",
+            defekte: null,
+            tuevTermin: nextYear,
+            anmerkungen: "Schlüssel liegt im Büroschrank Fach 1. Sommerreifen montiert.",
+            kilometerstand: 89400,
+            status: "BEREIT",
+          },
+          {
+            name: "Sprinter Werkstattwagen",
+            kennzeichen: "B-LL 202",
+            modell: "Mercedes-Benz Sprinter 316 CDI",
+            defekte: "Blinker hinten rechts defekt (Birne tauschen), Scheibenwischer vorne verschlissen",
+            tuevTermin: dueSoon,
+            anmerkungen: "Große Werkbank im Heck montiert. Tankkarte im Handschuhfach.",
+            kilometerstand: 148200,
+            status: "DEFEKT",
+          },
+        ],
+      });
+    } else {
+      const pool = getDbPool();
+      await pool.query(
+        `INSERT INTO "Auto" 
+          ("name", "kennzeichen", "modell", "defekte", "tuevTermin", "anmerkungen", "kilometerstand", "status", "createdAt", "updatedAt")
+         VALUES
+          ('VW Caddy 1 (Montage)', 'B-LL 101', 'Volkswagen Caddy 2.0 TDI', NULL, $1, 'Schlüssel liegt im Büroschrank Fach 1. Sommerreifen montiert.', 89400, 'BEREIT', NOW(), NOW()),
+          ('Sprinter Werkstattwagen', 'B-LL 202', 'Mercedes-Benz Sprinter 316 CDI', 'Blinker hinten rechts defekt (Birne tauschen), Scheibenwischer vorne verschlissen', $2, 'Große Werkbank im Heck montiert. Tankkarte im Handschuhfach.', 148200, 'DEFEKT', NOW(), NOW());
+        `,
+        [nextYear, dueSoon]
+      );
+    }
 
     await logActivity({
       bereich: "OFFICE",
