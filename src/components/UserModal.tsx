@@ -209,9 +209,9 @@ export function UserModal({
                   <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center mb-2 shadow-xs">
                     <Wrench className="w-4 h-4" />
                   </div>
-                  <span className="text-sm font-bold block">Techniker</span>
+                  <span className="text-sm font-bold block">Monteur</span>
                   <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    Werkstatt & Mobil
+                    Werkstatt & Montage
                   </span>
                 </button>
 
@@ -269,7 +269,7 @@ export function UserModal({
               <input
                 type="text"
                 required
-                placeholder="z.B. max_mustermann oder techniker1"
+                placeholder="z.B. max_mustermann oder monteur1"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
                 className="w-full px-3.5 py-2.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-violet-500 font-mono font-medium"

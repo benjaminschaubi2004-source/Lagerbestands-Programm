@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 interface LoginModalProps {
   isOpen: boolean;
   onClose?: () => void;
-  targetRoleHint?: "TECHNIKER" | "OFFICE" | "ADMIN";
+  targetRoleHint?: "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
   onLoggedIn?: (user: SessionUser) => void;
 }
 
@@ -88,7 +88,11 @@ export function LoginModal({
               </h3>
               <p className="text-xs text-zinc-500">
                 {targetRoleHint
-                  ? `Zugang für Bereich: ${targetRoleHint}`
+                  ? `Zugang für Bereich: ${
+                      targetRoleHint === "TECHNIKER" || targetRoleHint === "MONTEUR"
+                        ? "Monteur"
+                        : targetRoleHint
+                    }`
                   : "Melde dich mit deinem Benutzerkonto an"}
               </p>
             </div>
@@ -121,7 +125,7 @@ export function LoginModal({
               type="text"
               required
               autoFocus
-              placeholder="z.B. admin, techniker oder office"
+              placeholder="z.B. admin, monteur oder office"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3.5 py-2.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-medium"
@@ -170,11 +174,11 @@ export function LoginModal({
             <div className="grid grid-cols-3 gap-1.5 text-center">
               <button
                 type="button"
-                onClick={() => handleQuickFill("techniker", "techniker123")}
+                onClick={() => handleQuickFill("dulli2", "techniker123")}
                 className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer"
               >
                 <Wrench className="w-3 h-3 text-indigo-600 inline mr-1" />
-                Techniker
+                Monteur
               </button>
               <button
                 type="button"

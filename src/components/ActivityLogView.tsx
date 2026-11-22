@@ -98,16 +98,37 @@ export function ActivityLogView({ initialLogs, onLogsCleared }: ActivityLogViewP
   const countOffice = useMemo(() => logs.filter((l) => l.bereich === "OFFICE").length, [logs]);
   const countAdmin = useMemo(() => logs.filter((l) => l.bereich === "ADMIN").length, [logs]);
 
-  const formatTimestamp = (d: Date) => {
+  const formatCompactTimestamp = (d: Date) => {
     const date = new Date(d);
-    return date.toLocaleString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+    const now = new Date();
+    const isToday =
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear();
+
+    const timeStr = date.toLocaleTimeString("de-DE", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
     });
+
+    if (isToday) {
+      return {
+        primary: timeStr,
+        secondary: "Heute",
+        full: `Heute, ${timeStr}`,
+      };
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const dateStr = `${day}.${month}.`;
+
+    return {
+      primary: timeStr,
+      secondary: dateStr,
+      full: `${dateStr} ${timeStr}`,
+    };
   };
 
   // Icon je nach Aktion
@@ -138,7 +159,7 @@ export function ActivityLogView({ initialLogs, onLogsCleared }: ActivityLogViewP
             </h2>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Lückenloses Journal aller Aktionen bei Techniker, Office und Admin mit Datum, Uhrzeit und angemeldetem User.
+            Lückenloses Journal aller Aktionen bei Monteur, Office und Admin mit Datum, Uhrzeit und angemeldetem User.
           </p>
         </div>
 
@@ -215,7 +236,7 @@ export function ActivityLogView({ initialLogs, onLogsCleared }: ActivityLogViewP
           >
             <div className="flex items-center gap-2">
               <Wrench className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span className="text-xs sm:text-sm">Techniker</span>
+              <span className="text-xs sm:text-sm">Monteur</span>
             </div>
             <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
               {countTechniker}
@@ -289,97 +310,167 @@ export function ActivityLogView({ initialLogs, onLogsCleared }: ActivityLogViewP
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold uppercase tracking-wider text-[10px]">
-                  <th className="py-3 px-4">Zeitpunkt</th>
-                  <th className="py-3 px-4">Bereich</th>
-                  <th className="py-3 px-4">Benutzer</th>
-                  <th className="py-3 px-4">Aktion & Bewegung</th>
-                  <th className="py-3 px-4 hidden lg:table-cell">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {filteredLogs.map((item) => {
-                  const isAdminItem = item.bereich === "ADMIN";
-                  const isOfficeItem = item.bereich === "OFFICE";
+          <div>
+            {/* Mobile View: Schlanke, kompakte Liste (sm:hidden) */}
+            <div className="sm:hidden divide-y divide-zinc-100 dark:divide-zinc-800">
+              {filteredLogs.map((item) => {
+                const isAdminItem = item.bereich === "ADMIN";
+                const isOfficeItem = item.bereich === "OFFICE";
+                const ts = formatCompactTimestamp(item.createdAt);
 
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
-                    >
-                      {/* Zeitpunkt */}
-                      <td className="py-3 px-4 font-mono text-[11px] text-zinc-500 whitespace-nowrap">
-                        {formatTimestamp(item.createdAt)}
-                      </td>
+                return (
+                  <div
+                    key={item.id}
+                    className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2.5">
+                      {/* Links: Icon + Aktion + User */}
+                      <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                        <div className="mt-0.5 shrink-0">
+                          {getActionIcon(item.aktion, item.bereich)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          {/* Badges Zeile */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                              {item.aktion}
+                            </span>
+                            <span
+                              className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                                isAdminItem
+                                  ? "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300"
+                                  : isOfficeItem
+                                  ? "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+                                  : "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                              }`}
+                            >
+                              {item.bereich === "TECHNIKER" ? "MONTEUR" : item.bereich}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
+                              @{item.username}
+                            </span>
+                          </div>
 
-                      {/* Bereich */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            isAdminItem
-                              ? "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300"
-                              : isOfficeItem
-                              ? "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
-                              : "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
-                          }`}
-                        >
-                          {isAdminItem ? (
-                            <ShieldCheck className="w-3 h-3" />
-                          ) : isOfficeItem ? (
-                            <Building2 className="w-3 h-3" />
-                          ) : (
-                            <Wrench className="w-3 h-3" />
+                          {/* Beschreibung */}
+                          <p className="font-semibold text-xs text-zinc-900 dark:text-zinc-100 mt-1 leading-snug break-words">
+                            {item.beschreibung}
+                          </p>
+
+                          {/* Details */}
+                          {item.details && (
+                            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-normal break-words">
+                              {item.details}
+                            </p>
                           )}
-                          <span>{item.bereich}</span>
-                        </span>
-                      </td>
-
-                      {/* Benutzer */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-3 h-3 text-zinc-400" />
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200 font-mono text-[11px]">
-                            @{item.username}
-                          </span>
                         </div>
-                      </td>
+                      </div>
 
-                      {/* Aktion & Bewegung */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-start gap-2">
-                          <div className="mt-0.5 shrink-0">
-                            {getActionIcon(item.aktion, item.bereich)}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                                {item.aktion}
-                              </span>
-                              <span className="font-semibold text-xs text-zinc-900 dark:text-zinc-100">
-                                {item.beschreibung}
-                              </span>
-                            </div>
-                            {item.details && (
-                              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 lg:hidden">
-                                {item.details}
-                              </p>
+                      {/* Rechts: Sehr dezente, kompakte Zeit */}
+                      <div className="shrink-0 text-right font-mono text-[9.5px] text-zinc-400 dark:text-zinc-500 leading-tight pt-0.5">
+                        <span className="font-semibold text-zinc-500 dark:text-zinc-400">{ts.secondary}</span>
+                        <div className="text-[9px] text-zinc-400/80">{ts.primary}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop View: Tabelle mit schlanken Spalten und kompakten Zeiten (hidden sm:block) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold uppercase tracking-wider text-[10px]">
+                    <th className="py-2.5 px-3">Zeitpunkt</th>
+                    <th className="py-2.5 px-3">Bereich</th>
+                    <th className="py-2.5 px-3">Benutzer</th>
+                    <th className="py-2.5 px-3">Aktion & Bewegung</th>
+                    <th className="py-2.5 px-3 hidden lg:table-cell">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {filteredLogs.map((item) => {
+                    const isAdminItem = item.bereich === "ADMIN";
+                    const isOfficeItem = item.bereich === "OFFICE";
+                    const ts = formatCompactTimestamp(item.createdAt);
+
+                    return (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
+                      >
+                        {/* Zeitpunkt: dezent und kompakt */}
+                        <td className="py-2.5 px-3 font-mono text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
+                          <span className="font-semibold text-zinc-500 dark:text-zinc-400">{ts.secondary}</span>{" "}
+                          <span>{ts.primary}</span>
+                        </td>
+
+                        {/* Bereich */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              isAdminItem
+                                ? "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300"
+                                : isOfficeItem
+                                ? "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+                                : "bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                            }`}
+                          >
+                            {isAdminItem ? (
+                              <ShieldCheck className="w-3 h-3" />
+                            ) : isOfficeItem ? (
+                              <Building2 className="w-3 h-3" />
+                            ) : (
+                              <Wrench className="w-3 h-3" />
                             )}
-                          </div>
-                        </div>
-                      </td>
+                            <span>{item.bereich === "TECHNIKER" ? "MONTEUR" : item.bereich}</span>
+                          </span>
+                        </td>
 
-                      {/* Details (Große Bildschirme) */}
-                      <td className="py-3 px-4 text-xs text-zinc-500 dark:text-zinc-400 hidden lg:table-cell max-w-xs truncate">
-                        {item.details || "–"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        {/* Benutzer */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <User className="w-3 h-3 text-zinc-400" />
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 font-mono text-[11px]">
+                              @{item.username}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Aktion & Bewegung */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 shrink-0">
+                              {getActionIcon(item.aktion, item.bereich)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                                  {item.aktion}
+                                </span>
+                                <span className="font-semibold text-xs text-zinc-900 dark:text-zinc-100">
+                                  {item.beschreibung}
+                                </span>
+                              </div>
+                              {item.details && (
+                                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 lg:hidden">
+                                  {item.details}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Details (Große Bildschirme) */}
+                        <td className="py-2.5 px-3 text-xs text-zinc-500 dark:text-zinc-400 hidden lg:table-cell max-w-xs truncate">
+                          {item.details || "–"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -388,7 +479,7 @@ export function ActivityLogView({ initialLogs, onLogsCleared }: ActivityLogViewP
       <ConfirmModal
         isOpen={isClearModalOpen}
         title="Aktivitäts- und Bewegungs-Logs leeren?"
-        message="Möchtest du das gesamte Aktivitäts- und Audit-Log sowie die Buchungshistorie (Eingänge & Ausgänge) leeren? Vor dem Leeren wird automatisch ein vollständiges Backup mit allen Daten im Projektordner ('backups/logs/') erstellt. Techniker, Office und Admins sehen danach ein leeres Log."
+        message="Möchtest du das gesamte Aktivitäts- und Audit-Log sowie die Buchungshistorie (Eingänge & Ausgänge) leeren? Vor dem Leeren wird automatisch ein vollständiges Backup mit allen Daten im Projektordner ('backups/logs/') erstellt. Monteure, Office und Admins sehen danach ein leeres Log."
         confirmText="Logs sichern & leeren"
         cancelText="Abbrechen"
         isDestructive={true}

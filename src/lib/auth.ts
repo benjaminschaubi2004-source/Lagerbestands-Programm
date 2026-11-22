@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export type UserRole = "TECHNIKER" | "OFFICE" | "ADMIN";
+export type UserRole = "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
 
 export interface SessionUser {
   id: number;
@@ -220,8 +220,15 @@ export async function checkRouteAccess(allowedRoles: UserRole[]): Promise<{
   }
 
   // 3. Wenn angemeldet:
-  // Admin darf grundsätzlich in alle Bereiche (Admin, Techniker, Office)
-  if (user.role === "ADMIN" || allowedRoles.includes(user.role)) {
+  // Admin darf grundsätzlich in alle Bereiche (Admin, Monteur, Office)
+  const isTechnikerOrMonteur = user.role === "TECHNIKER" || (user.role as string) === "MONTEUR";
+  const allowsMonteur = allowedRoles.includes("TECHNIKER") || (allowedRoles as string[]).includes("MONTEUR");
+
+  if (
+    user.role === "ADMIN" ||
+    allowedRoles.includes(user.role) ||
+    (isTechnikerOrMonteur && allowsMonteur)
+  ) {
     return { allowed: true, user, isLocal };
   }
 
@@ -244,7 +251,7 @@ export async function protectRoute(
       redirect(`/?redirect=${encodeURIComponent(targetPath)}&auth=required`);
     } else if (reason === "wrong_role") {
       // Wenn falsche Rolle: Weiterleitung in den für den Benutzer passenden Bereich
-      if (user?.role === "TECHNIKER") {
+      if (user?.role === "TECHNIKER" || (user?.role as string) === "MONTEUR") {
         redirect("/techniker?denied=true");
       } else if (user?.role === "OFFICE") {
         redirect("/office?denied=true");

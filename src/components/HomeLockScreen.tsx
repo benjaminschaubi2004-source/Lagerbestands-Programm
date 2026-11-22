@@ -247,10 +247,10 @@ export function HomeLockScreen({
                         <Wrench className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-base">
-                        Techniker-Portal
+                        Monteur-Portal
                       </h3>
                       <p className="text-xs text-zinc-500 mt-1">
-                        Werkstatt-Ansicht, Entnahme & Einlagerung
+                        Werkstatt-Ansicht, Entnahme & Einlagerung für Monteure
                       </p>
                     </div>
                     <div className="pt-4 mt-2 flex items-center justify-between text-xs font-bold text-indigo-700 dark:text-indigo-300 group-hover:translate-x-1 transition-transform">
@@ -299,7 +299,7 @@ export function HomeLockScreen({
                   className="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all group"
                 >
                   <Wrench className="w-5 h-5" />
-                  <span>Weiter zum Techniker-Assistenten</span>
+                  <span>Weiter zum Monteur-Assistenten</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -388,7 +388,7 @@ export function HomeLockScreen({
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="z. B. techniker, office oder admin"
+                      placeholder="z. B. monteur, office oder admin"
                       autoFocus
                       required
                       className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent font-medium"
@@ -444,15 +444,15 @@ export function HomeLockScreen({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     type="button"
-                    onClick={() => handleQuickFill("techniker", "techniker123")}
+                    onClick={() => handleQuickFill("dulli2", "techniker123")}
                     className="p-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 text-left transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center gap-2 font-bold text-xs text-indigo-700 dark:text-indigo-300">
                       <Wrench className="w-3.5 h-3.5" />
-                      <span>Techniker</span>
+                      <span>Monteur</span>
                     </div>
                     <span className="text-[10px] text-zinc-400 font-mono mt-0.5 block">
-                      techniker / techniker123
+                      dulli2 / techniker123
                     </span>
                   </button>
 
@@ -507,7 +507,7 @@ export function HomeLockScreen({
                       className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 hover:border-indigo-500 text-zinc-700 dark:text-zinc-200 flex items-center gap-1.5"
                     >
                       <Wrench className="w-3 h-3 text-indigo-500" />
-                      <span>/techniker</span>
+                      <span>/monteur</span>
                     </Link>
                     <Link
                       href="/office"

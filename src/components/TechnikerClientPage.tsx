@@ -61,7 +61,7 @@ export function TechnikerClientPage({
                 <Wrench className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-base font-bold leading-tight">Techniker-Assistent</h1>
+                <h1 className="text-base font-bold leading-tight">Monteur-Assistent</h1>
                 <p className="text-[11px] text-zinc-500">Material & Variante wählen</p>
               </div>
             </div>

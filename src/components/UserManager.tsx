@@ -13,9 +13,7 @@ import {
   Edit2,
   Trash2,
   Users,
-  KeyRound,
   Clock,
-  AtSign,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { UserModal } from "./UserModal";
@@ -107,51 +105,51 @@ export function UserManager({ initialUsers, onChanged }: UserManagerProps) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       {/* 1. Kopfbereich mit Übersicht & Neuer Benutzer Button */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3.5 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center shadow-xs">
-              <Users className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center shadow-xs">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              Benutzer- & Rollenverwaltung
+            <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              Benutzerverwaltung
             </h2>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Verwalte Zugangsdaten und Rollen für Werkstatt (Techniker), Büro (Office) und Lagerleitung (Admin).
+          <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Werkstatt (Monteur), Büro (Office) und Leitung (Admin).
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-2 shrink-0"
+          className="w-full sm:w-auto px-3.5 py-2 text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5 shrink-0"
         >
-          <UserPlus className="w-4 h-4" />
-          <span>Neuen Benutzer anlegen</span>
+          <UserPlus className="w-3.5 h-3.5" />
+          <span>Neuer Benutzer</span>
         </button>
       </div>
 
       {/* 2. Rollen-Kategorie-Filter & Suche */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 sm:p-4 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 sm:p-4 shadow-xs space-y-2 sm:space-y-3">
         {/* Filter-Karten für die 3 Kategorien */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
           {/* Alle */}
           <button
             type="button"
             onClick={() => setSelectedRoleFilter("ALL")}
-            className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
+            className={`p-2 sm:p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
               selectedRoleFilter === "ALL"
                 ? "border-violet-600 bg-violet-50 dark:bg-violet-950/60 font-bold text-violet-900 dark:text-violet-200 ring-1 ring-violet-500/40"
                 : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-zinc-500" />
-              <span className="text-xs sm:text-sm">Alle Rollen</span>
+            <div className="flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="text-[11px] sm:text-xs">Alle</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-zinc-100 dark:bg-zinc-800">
+            <span className="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold bg-zinc-100 dark:bg-zinc-800">
               {initialUsers.length}
             </span>
           </button>
@@ -160,17 +158,17 @@ export function UserManager({ initialUsers, onChanged }: UserManagerProps) {
           <button
             type="button"
             onClick={() => setSelectedRoleFilter("TECHNIKER")}
-            className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
+            className={`p-2 sm:p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
               selectedRoleFilter === "TECHNIKER"
                 ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 font-bold text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-500/40"
                 : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span className="text-xs sm:text-sm">Techniker</span>
+            <div className="flex items-center gap-1.5">
+              <Wrench className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-[11px] sm:text-xs">Monteur</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+            <span className="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
               {countTechniker}
             </span>
           </button>
@@ -179,17 +177,17 @@ export function UserManager({ initialUsers, onChanged }: UserManagerProps) {
           <button
             type="button"
             onClick={() => setSelectedRoleFilter("OFFICE")}
-            className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
+            className={`p-2 sm:p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
               selectedRoleFilter === "OFFICE"
                 ? "border-blue-600 bg-blue-50 dark:bg-blue-950/60 font-bold text-blue-900 dark:text-blue-200 ring-1 ring-blue-500/40"
                 : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs sm:text-sm">Office</span>
+            <div className="flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span className="text-[11px] sm:text-xs">Office</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+            <span className="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
               {countOffice}
             </span>
           </button>
@@ -198,17 +196,17 @@ export function UserManager({ initialUsers, onChanged }: UserManagerProps) {
           <button
             type="button"
             onClick={() => setSelectedRoleFilter("ADMIN")}
-            className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
+            className={`p-2 sm:p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between ${
               selectedRoleFilter === "ADMIN"
                 ? "border-violet-600 bg-violet-50 dark:bg-violet-950/60 font-bold text-violet-900 dark:text-violet-200 ring-1 ring-violet-500/40"
                 : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-              <span className="text-xs sm:text-sm">Admin</span>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
+              <span className="text-[11px] sm:text-xs">Admin</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300">
+            <span className="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300">
               {countAdmin}
             </span>
           </button>
@@ -216,135 +214,213 @@ export function UserManager({ initialUsers, onChanged }: UserManagerProps) {
 
         {/* Suchfeld */}
         <div className="relative">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Benutzer filtern (nach Name oder @anmeldename)..."
+            placeholder="Benutzer filtern (Name oder @anmeldename)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-violet-500"
+            className="w-full pl-8 pr-3 py-1.5 sm:py-2 text-xs border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-violet-500"
           />
         </div>
       </div>
 
-      {/* 3. Benutzer-Tabelle */}
+      {/* 3. Benutzer-Liste (Kompakt auf Mobile & Tabelle auf Desktop) */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
         {filteredUsers.length === 0 ? (
-          <div className="py-12 px-4 text-center text-zinc-500">
-            <User className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mx-auto mb-2" />
-            <p className="font-semibold text-sm">Keine Benutzer gefunden</p>
-            <p className="text-xs text-zinc-400 mt-1">
+          <div className="py-10 px-4 text-center text-zinc-500">
+            <User className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto mb-1.5" />
+            <p className="font-semibold text-xs">Keine Benutzer gefunden</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">
               {searchTerm ? "Versuche einen anderen Suchbegriff." : "Lege einen neuen Benutzer an."}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="bg-zinc-50/75 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
-                  <th className="py-3 px-4 sm:px-6">Benutzer</th>
-                  <th className="py-3 px-4">Anmeldename</th>
-                  <th className="py-3 px-4">Kategorie / Rolle</th>
-                  <th className="py-3 px-4 hidden md:table-cell">Erstellt am</th>
-                  <th className="py-3 px-4 sm:px-6 text-right w-24">Aktionen</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                {filteredUsers.map((user) => {
-                  const isTechniker = user.role === "TECHNIKER";
-                  const isOffice = user.role === "OFFICE";
-                  const isAdmin = user.role === "ADMIN";
+          <>
+            {/* A) Mobile Kompakt-Ansicht (sm:hidden) */}
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/80 sm:hidden">
+              {filteredUsers.map((user) => {
+                const isTechniker = user.role === "TECHNIKER";
+                const isOffice = user.role === "OFFICE";
+                const isAdmin = user.role === "ADMIN";
 
-                  return (
-                    <tr
-                      key={user.id}
-                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors"
-                    >
-                      {/* Name & Avatar */}
-                      <td className="py-3.5 px-4 sm:px-6">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
-                              isAdmin
-                                ? "bg-violet-600 text-white"
-                                : isOffice
-                                ? "bg-blue-600 text-white"
-                                : "bg-indigo-600 text-white"
-                            }`}
-                          >
-                            {user.name.substring(0, 2).toUpperCase()}
-                          </div>
-                          <div>
-                            <span className="font-bold text-zinc-900 dark:text-zinc-100 block text-sm">
+                return (
+                  <div
+                    key={user.id}
+                    className="p-2.5 flex items-center justify-between gap-2.5 hover:bg-zinc-50/60 dark:hover:bg-zinc-800/30 transition-colors"
+                  >
+                    {/* Links: Avatar & Infos */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
+                          isAdmin
+                            ? "bg-violet-600 text-white"
+                            : isOffice
+                            ? "bg-blue-600 text-white"
+                            : "bg-indigo-600 text-white"
+                        }`}
+                      >
+                        {user.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate">
+                            {user.name}
+                          </span>
+                          <span className="text-[10px] font-mono text-zinc-400 shrink-0">
+                            @{user.username}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {isAdmin ? (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-violet-50 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                              <ShieldCheck className="w-2.5 h-2.5" />
+                              Admin
+                            </span>
+                          ) : isOffice ? (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                              <Building2 className="w-2.5 h-2.5" />
+                              Office
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                              <Wrench className="w-2.5 h-2.5" />
+                              Monteur
+                            </span>
+                          )}
+                          <span className="text-[10px] text-zinc-400">
+                            {formatDatum(user.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rechts: Aktionen */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleOpenEdit(user)}
+                        className="p-1.5 text-zinc-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                        title="Bearbeiten"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingUser(user)}
+                        className="p-1.5 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                        title="Löschen"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* B) Desktop / Tablet Tabellen-Ansicht (hidden sm:block) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-zinc-50/75 dark:bg-zinc-800/50 text-zinc-500 font-semibold uppercase tracking-wider text-[10px] border-b border-zinc-200 dark:border-zinc-800">
+                    <th className="py-2.5 px-4">Benutzer</th>
+                    <th className="py-2.5 px-3">Anmeldename</th>
+                    <th className="py-2.5 px-3">Rolle</th>
+                    <th className="py-2.5 px-3 hidden md:table-cell">Erstellt am</th>
+                    <th className="py-2.5 px-4 text-right w-20">Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {filteredUsers.map((user) => {
+                    const isTechniker = user.role === "TECHNIKER";
+                    const isOffice = user.role === "OFFICE";
+                    const isAdmin = user.role === "ADMIN";
+
+                    return (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors"
+                      >
+                        {/* Name & Avatar */}
+                        <td className="py-2.5 px-4">
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
+                                isAdmin
+                                  ? "bg-violet-600 text-white"
+                                  : isOffice
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-indigo-600 text-white"
+                              }`}
+                            >
+                              {user.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-bold text-zinc-900 dark:text-zinc-100 block text-xs">
                               {user.name}
                             </span>
-                            <span className="text-[11px] text-zinc-400 md:hidden">
-                              @{user.username}
-                            </span>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Anmeldename */}
-                      <td className="py-3.5 px-4 font-mono text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                        <span className="bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700">
-                          @{user.username}
-                        </span>
-                      </td>
-
-                      {/* Kategorie / Rolle Badge */}
-                      <td className="py-3.5 px-4">
-                        {isAdmin ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            Admin
+                        {/* Anmeldename */}
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-zinc-700 dark:text-zinc-300">
+                          <span className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
+                            @{user.username}
                           </span>
-                        ) : isOffice ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                            <Building2 className="w-3.5 h-3.5" />
-                            Office
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                            <Wrench className="w-3.5 h-3.5" />
-                            Techniker
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Erstellungsdatum */}
-                      <td className="py-3.5 px-4 text-xs text-zinc-500 dark:text-zinc-400 hidden md:table-cell">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3 h-3 text-zinc-400" />
-                          <span>{formatDatum(user.createdAt)}</span>
-                        </div>
-                      </td>
+                        {/* Rolle Badge */}
+                        <td className="py-2.5 px-3">
+                          {isAdmin ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                              <ShieldCheck className="w-3 h-3" />
+                              Admin
+                            </span>
+                          ) : isOffice ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                              <Building2 className="w-3 h-3" />
+                              Office
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                              <Wrench className="w-3 h-3" />
+                              Monteur
+                            </span>
+                          )}
+                        </td>
 
-                      {/* Aktionen */}
-                      <td className="py-3.5 px-4 sm:px-6 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => handleOpenEdit(user)}
-                            className="p-1.5 text-zinc-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
-                            title="Benutzer bearbeiten"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeletingUser(user)}
-                            className="p-1.5 text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
-                            title="Benutzer löschen"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {/* Erstellungsdatum */}
+                        <td className="py-2.5 px-3 text-[11px] text-zinc-500 dark:text-zinc-400 hidden md:table-cell">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-zinc-400" />
+                            <span>{formatDatum(user.createdAt)}</span>
+                          </div>
+                        </td>
+
+                        {/* Aktionen */}
+                        <td className="py-2.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleOpenEdit(user)}
+                              className="p-1 text-zinc-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                              title="Benutzer bearbeiten"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeletingUser(user)}
+                              className="p-1 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                              title="Benutzer löschen"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

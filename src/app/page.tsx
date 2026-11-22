@@ -6,8 +6,8 @@ import { ToastProvider } from "@/components/Toast";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Lagerliste – Lagerverwaltung & Techniker-Portal",
-  description: "Geschützter Zugang zu Techniker, Office und Admin",
+  title: "Lagerliste – Lagerverwaltung & Monteur-Portal",
+  description: "Geschützter Zugang zu Monteur, Office und Admin",
 };
 
 interface HomePageProps {

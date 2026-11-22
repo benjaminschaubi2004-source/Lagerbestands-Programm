@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useTransition } from "react";
 import { MaterialWithVarianten, getMaterialien, BuchungInfo, getBuchungen } from "@/actions/materialien";
@@ -108,49 +108,51 @@ export function Dashboard({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-zinc-50/70 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col">
+      <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-zinc-50/70 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col">
         {/* Top Header */}
         <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+          <div className="max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-4 h-14 sm:h-16 w-full max-w-full">
               {/* Logo / Brand */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-md shadow-violet-500/20">
-                  <ShieldCheck className="w-6 h-6" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-md shadow-violet-500/20 shrink-0">
+                  <ShieldCheck className="w-4 h-4 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
+                    <span className="font-bold text-sm sm:text-lg tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent truncate">
                       Lagerliste Admin
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/70 text-violet-700 dark:text-violet-300 font-semibold border border-violet-200 dark:border-violet-800">
+                    <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/70 text-violet-700 dark:text-violet-300 font-semibold border border-violet-200 dark:border-violet-800 shrink-0">
                       Vollzugriff
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-500">Stammdaten, Benutzerverwaltung & Daten-Log</p>
+                  <p className="text-xs text-zinc-500 hidden md:block truncate">
+                    Stammdaten, Benutzerverwaltung & Daten-Log
+                  </p>
                 </div>
               </div>
 
               {/* Actions, User Badge & Role Switcher */}
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                 <button
                   onClick={reloadData}
                   disabled={isPending}
-                  className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  className="p-1.5 sm:p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
                   title="Alle Daten aktualisieren"
                 >
-                  <RefreshCw className={`w-4 h-4 ${isPending ? "animate-spin text-violet-600" : ""}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isPending ? "animate-spin text-violet-600" : ""}`} />
                 </button>
 
-                {/* Android APK Download Button */}
+                {/* Android APK Download Button (nur Tablet/Desktop, da in Android-App nicht benötigt) */}
                 <a
                   href="/downloads/Lagerliste.apk"
                   download="Lagerliste.apk"
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center gap-1.5 shadow-xs"
+                  className="hidden md:flex px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition-colors items-center gap-1.5 shadow-xs shrink-0"
                   title="Lagerliste Android APK herunterladen"
                 >
                   <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
-                  <span className="hidden sm:inline">Android APK</span>
+                  <span>Android APK</span>
                   <Download className="w-3.5 h-3.5" />
                 </a>
 
@@ -159,7 +161,8 @@ export function Dashboard({
 
                 <Link
                   href="/"
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5"
+                  className="p-1.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 shrink-0"
+                  title="Rolle wechseln"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Rolle wechseln</span>
@@ -168,19 +171,19 @@ export function Dashboard({
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex gap-4 border-t border-zinc-100 dark:border-zinc-800/80 pt-1 -mb-px overflow-x-auto">
+            <div className="flex gap-2 sm:gap-4 border-t border-zinc-100 dark:border-zinc-800/80 pt-1 -mb-px overflow-x-auto w-full max-w-full">
               {/* 1. Tab: Materialien */}
               <button
                 onClick={() => setActiveTab("materialien")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "materialien"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <Package className="w-4 h-4" />
-                <span>Lagerliste (Materialien & Varianten)</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
+                <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Lagerliste</span>
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
                   {materialien.length} ({totalVarianten})
                 </span>
               </button>
@@ -188,15 +191,15 @@ export function Dashboard({
               {/* 2. Tab: Statistik (NEU) */}
               <button
                 onClick={() => setActiveTab("statistik")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "statistik"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <BarChart3 className="w-4 h-4 text-indigo-500" />
-                <span>Bestands- & Umschlagstatistik</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold">
+                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
+                <span>Statistik</span>
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold">
                   Neu
                 </span>
               </button>
@@ -204,80 +207,80 @@ export function Dashboard({
               {/* 3. Tab: Auto's (Fuhrpark) */}
               <button
                 onClick={() => setActiveTab("autos")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "autos"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <Car className="w-4 h-4 text-blue-500" />
-                <span>Auto&apos;s (Fuhrpark)</span>
+                <Car className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
+                <span>Fuhrpark</span>
                 {autos.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-semibold">
+                  <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-semibold">
                     {autos.length}
                   </span>
                 )}
               </button>
 
-              {/* 3. Tab: Größen */}
+              {/* 4. Tab: Größen */}
               <button
                 onClick={() => setActiveTab("groessen")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "groessen"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <Ruler className="w-4 h-4" />
-                <span>Variantenstamm (Größen)</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
+                <Ruler className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Größen</span>
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
                   {groessen.length}
                 </span>
               </button>
 
-              {/* 3. Tab: Benutzerverwaltung (NEU) */}
+              {/* 5. Tab: Benutzerverwaltung */}
               <button
                 onClick={() => setActiveTab("users")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "users"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <Users className="w-4 h-4" />
-                <span>Benutzerverwaltung</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 font-bold">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Benutzer</span>
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 font-bold">
                   {users.length}
                 </span>
               </button>
 
-              {/* 4. Tab: Daten-Log (NEU) */}
+              {/* 6. Tab: Daten-Log */}
               <button
                 onClick={() => setActiveTab("logs")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "logs"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <History className="w-4 h-4" />
-                <span>Daten- & Bewegungs-Log</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
+                <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Audit-Log</span>
+                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
                   {logs.length}
                 </span>
               </button>
 
-              {/* 5. Tab: Techniker-Vorschau */}
+              {/* 7. Tab: Techniker-Vorschau */}
               <button
                 onClick={() => setActiveTab("techniker")}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
                   activeTab === "techniker"
                     ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
                 <Wrench className="w-4 h-4" />
-                <span>Techniker-Vorschau</span>
+                <span>Monteur-Vorschau</span>
               </button>
 
               {/* 6. Tab: Android App Download (NEU) */}
@@ -300,7 +303,7 @@ export function Dashboard({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 overflow-x-hidden">
           {activeTab === "materialien" ? (
             <MaterialienTable
               initialMaterialien={materialien}
@@ -341,3 +344,4 @@ export function Dashboard({
     </ToastProvider>
   );
 }
+

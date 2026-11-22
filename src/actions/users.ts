@@ -9,7 +9,7 @@ export interface UserInfo {
   id: number;
   username: string;
   name: string;
-  role: "TECHNIKER" | "OFFICE" | "ADMIN";
+  role: "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,7 +45,7 @@ export async function createUser(data: {
   username: string;
   name: string;
   password: string;
-  role: "TECHNIKER" | "OFFICE" | "ADMIN";
+  role: "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
 }): Promise<{ success: boolean; error?: string; user?: UserInfo }> {
   const username = data.username?.trim().toLowerCase();
   const name = data.name?.trim();
@@ -61,7 +61,7 @@ export async function createUser(data: {
   if (!password || password.length < 4) {
     return { success: false, error: "Das Passwort muss mindestens 4 Zeichen lang sein." };
   }
-  if (!["TECHNIKER", "OFFICE", "ADMIN"].includes(role)) {
+  if (!["TECHNIKER", "MONTEUR", "OFFICE", "ADMIN"].includes(role)) {
     return { success: false, error: "Ungültige Rolle ausgewählt." };
   }
 
@@ -113,7 +113,7 @@ export async function updateUser(
     username: string;
     name: string;
     password?: string;
-    role: "TECHNIKER" | "OFFICE" | "ADMIN";
+    role: "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
   }
 ): Promise<{ success: boolean; error?: string }> {
   const username = data.username?.trim().toLowerCase();
@@ -127,7 +127,7 @@ export async function updateUser(
   if (!name) {
     return { success: false, error: "Der vollständige Name ist erforderlich." };
   }
-  if (!["TECHNIKER", "OFFICE", "ADMIN"].includes(role)) {
+  if (!["TECHNIKER", "MONTEUR", "OFFICE", "ADMIN"].includes(role)) {
     return { success: false, error: "Ungültige Rolle ausgewählt." };
   }
 

@@ -6,8 +6,8 @@ import { TechnikerClientPage } from "@/components/TechnikerClientPage";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Techniker-Assistent – Lagerliste",
-  description: "Mobile Materialauswahl, Einnahme und Ausgabe für Techniker",
+  title: "Monteur-Assistent – Lagerliste",
+  description: "Mobile Materialauswahl, Einnahme und Ausgabe für Monteure",
 };
 
 export default async function TechnikerPage() {

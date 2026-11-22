@@ -54,5 +54,8 @@ next-env.d.ts
 # local binaries
 *.apk
 
+# local backups
+/backups
+
 # local helper scripts
 push.bat

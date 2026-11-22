@@ -40,7 +40,7 @@ export function AndroidAppView() {
             Lagerliste für Android
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6 max-w-2xl">
-            Installiere die Lagerliste als eigenständige App auf Android-Smartphones und -Tablets. Ideal für Techniker in der Werkstatt und unterwegs vor dem Lagerregal sowie fürs Office.
+            Installiere die Lagerliste als eigenständige App auf Android-Smartphones und -Tablets. Ideal für Monteure in der Werkstatt und unterwegs vor dem Lagerregal sowie fürs Office.
           </p>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
@@ -51,7 +51,7 @@ export function AndroidAppView() {
               className="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
             >
               <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-              <span>Lagerliste.apk herunterladen (2.8 MB)</span>
+              <span>Lagerliste.apk herunterladen (v1.0 Native)</span>
             </a>
 
             <div className="text-xs text-zinc-400 flex items-center justify-center sm:justify-start gap-2 py-2 px-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
@@ -73,7 +73,7 @@ export function AndroidAppView() {
               <Wrench className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100">
-              Für Techniker & Werkstatt
+              Für Monteure & Werkstatt
             </h3>
             <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
               Direkt vor dem Lagerregal: Material & Variante auswählen, Artikelnummer ablesen und Bestandsbuchungen (Ausgabe / Einnahme) in Sekundenschnelle erfassen.
@@ -114,7 +114,7 @@ export function AndroidAppView() {
               Für Administratoren
             </h3>
             <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-              Vollzugriff auch in der App: Materialien anlegen, Benutzer verwalten (Techniker/Office/Admin) und das vollständige Aktivitäts-Log einsehen.
+              Vollzugriff auch in der App: Materialien anlegen, Benutzer verwalten (Monteur/Office/Admin) und das vollständige Aktivitäts-Log einsehen.
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-[11px] font-semibold text-violet-600 dark:text-violet-400 flex items-center gap-1.5">

@@ -10,7 +10,7 @@ import { useToast } from "./Toast";
 
 interface UserHeaderBadgeProps {
   currentUser?: SessionUser | null;
-  targetRoleHint?: "TECHNIKER" | "OFFICE" | "ADMIN";
+  targetRoleHint?: "TECHNIKER" | "MONTEUR" | "OFFICE" | "ADMIN";
 }
 
 export function UserHeaderBadge({ currentUser, targetRoleHint }: UserHeaderBadgeProps) {
@@ -49,10 +49,10 @@ export function UserHeaderBadge({ currentUser, targetRoleHint }: UserHeaderBadge
   const isOffice = currentUser.role === "OFFICE";
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-xs">
+    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2.5 py-1 rounded-lg sm:rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-xs shrink-0">
         <div
-          className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px] text-white shrink-0 ${
+          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-[10px] sm:text-[11px] text-white shrink-0 ${
             isAdmin
               ? "bg-violet-600"
               : isOffice
@@ -61,11 +61,11 @@ export function UserHeaderBadge({ currentUser, targetRoleHint }: UserHeaderBadge
           }`}
         >
           {isAdmin ? (
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           ) : isOffice ? (
-            <Building2 className="w-3.5 h-3.5" />
+            <Building2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           ) : (
-            <Wrench className="w-3.5 h-3.5" />
+            <Wrench className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           )}
         </div>
 
@@ -74,11 +74,14 @@ export function UserHeaderBadge({ currentUser, targetRoleHint }: UserHeaderBadge
             {currentUser.name}
           </span>
           <span className="text-[10px] text-zinc-400 block leading-tight font-mono">
-            @{currentUser.username} • {currentUser.role}
+            @{currentUser.username} •{" "}
+            {currentUser.role === "TECHNIKER" || (currentUser.role as string) === "MONTEUR"
+              ? "Monteur"
+              : currentUser.role}
           </span>
         </div>
 
-        <span className="sm:hidden font-bold text-zinc-800 dark:text-zinc-200">
+        <span className="sm:hidden font-bold text-[11px] text-zinc-800 dark:text-zinc-200 max-w-[65px] truncate">
           {currentUser.name.split(" ")[0]}
         </span>
       </div>
@@ -86,10 +89,10 @@ export function UserHeaderBadge({ currentUser, targetRoleHint }: UserHeaderBadge
       <button
         type="button"
         onClick={handleLogout}
-        className="p-1.5 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+        className="p-1 sm:p-1.5 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer shrink-0"
         title="Abmelden"
       >
-        <LogOut className="w-4 h-4" />
+        <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </button>
     </div>
   );
