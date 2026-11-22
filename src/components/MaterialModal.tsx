@@ -10,14 +10,16 @@ interface MaterialModalProps {
   isOpen: boolean;
   materialToEdit?: MaterialWithVarianten | null;
   groessen: GroesseWithCount[];
+  initialName?: string;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (createdMaterial?: MaterialWithVarianten) => void;
 }
 
 export function MaterialModal({
   isOpen,
   materialToEdit,
   groessen,
+  initialName,
   onClose,
   onSaved,
 }: MaterialModalProps) {
@@ -49,7 +51,7 @@ export function MaterialModal({
       setBeschreibung(materialToEdit.beschreibung || "");
       setCreateInitialVariante(false);
     } else {
-      setName("");
+      setName(initialName || "");
       setHersteller("");
       setBeschreibung("");
       setCreateInitialVariante(true);
@@ -130,7 +132,8 @@ export function MaterialModal({
           ? `Material "${matName}" erfolgreich aktualisiert.`
           : `Material "${matName}" erfolgreich angelegt.`
       );
-      onSaved();
+      const createdMat = (res as any)?.material || (isEditing && materialToEdit ? materialToEdit : undefined);
+      onSaved(createdMat);
       onClose();
     } else {
       setErrorMessage(res.error || "Ein Fehler ist aufgetreten.");

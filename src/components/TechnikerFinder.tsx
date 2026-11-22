@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { VarianteModal } from "./VarianteModal";
+import { MaterialModal } from "./MaterialModal";
 import { ConfirmModal } from "./ConfirmModal";
 import { clearAndBackupAllLogs } from "@/actions/logs";
 
@@ -81,6 +82,7 @@ export function TechnikerFinder({
   const [menge, setMenge] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
   const [isAddVarianteOpen, setIsAddVarianteOpen] = useState(false);
+  const [isAddMaterialOpen, setIsAddMaterialOpen] = useState(false);
   const [materialSearch, setMaterialSearch] = useState("");
 
   // Finde das ausgewählte Material
@@ -224,11 +226,19 @@ export function TechnikerFinder({
               <div className="space-y-4">
                 {/* Schritt 1: Material auswählen */}
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                       1. Material
                     </label>
-                    <span className="text-xs text-zinc-400 font-medium">{materialien.length} zur Auswahl</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddMaterialOpen(true)}
+                      className="min-h-[40px] text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 cursor-pointer py-1.5 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 active:bg-indigo-100 transition-colors touch-manipulation"
+                      title="Neues Material anlegen"
+                    >
+                      <Plus className="w-4 h-4" />
+                      + Material hinzufügen
+                    </button>
                   </div>
 
                   {/* Suchfeld */}
@@ -252,22 +262,38 @@ export function TechnikerFinder({
                     )}
                   </div>
 
-                  <select
-                    value={selectedMaterialId ?? ""}
-                    onChange={(e) => {
-                      const newId = Number(e.target.value) || null;
-                      setSelectedMaterialId(newId);
-                    }}
-                    className="w-full px-3.5 py-3 text-base sm:text-sm font-semibold border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer touch-manipulation"
-                  >
-                    {filteredMaterialien.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                        {m.hersteller ? ` [${m.hersteller}]` : ""} ({m.varianten.length}{" "}
-                        {m.varianten.length === 1 ? "Variante" : "Varianten"})
-                      </option>
-                    ))}
-                  </select>
+                  {filteredMaterialien.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-center space-y-2.5">
+                      <p className="text-xs font-medium text-indigo-900 dark:text-indigo-300">
+                        Kein Material gefunden{materialSearch ? ` für "${materialSearch}"` : ""}.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddMaterialOpen(true)}
+                        className="min-h-[44px] px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs touch-manipulation"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Jetzt &quot;{materialSearch.trim() || "Neues Material"}&quot; anlegen
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedMaterialId ?? ""}
+                      onChange={(e) => {
+                        const newId = Number(e.target.value) || null;
+                        setSelectedMaterialId(newId);
+                      }}
+                      className="w-full px-3.5 py-3 text-base sm:text-sm font-semibold border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer touch-manipulation"
+                    >
+                      {filteredMaterialien.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                          {m.hersteller ? ` [${m.hersteller}]` : ""} ({m.varianten.length}{" "}
+                          {m.varianten.length === 1 ? "Variante" : "Varianten"})
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 {/* Schritt 2: Variante auswählen */}
@@ -627,6 +653,21 @@ export function TechnikerFinder({
           )}
         </div>
       )}
+
+      {/* Modal zum Hinzufügen eines neuen Materials */}
+      <MaterialModal
+        isOpen={isAddMaterialOpen}
+        groessen={groessen}
+        initialName={materialSearch.trim()}
+        onClose={() => setIsAddMaterialOpen(false)}
+        onSaved={(created) => {
+          onDataChanged();
+          if (created?.id) {
+            setSelectedMaterialId(created.id);
+            setMaterialSearch("");
+          }
+        }}
+      />
 
       {/* Modal zum Hinzufügen einer Variante */}
       {currentMaterial && (

@@ -179,6 +179,10 @@ export async function createMaterial(data: {
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true, material: created };
   } catch (error) {
     console.error("Fehler beim Anlegen des Materials:", error);
@@ -225,6 +229,10 @@ export async function updateMaterial(
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Fehler beim Aktualisieren des Materials:", error);
@@ -247,6 +255,10 @@ export async function deleteMaterial(id: number): Promise<{ success: boolean; er
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Fehler beim Löschen des Materials:", error);
@@ -330,6 +342,10 @@ export async function addVariante(
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Fehler beim Hinzufügen der Variante:", error);
@@ -385,6 +401,10 @@ export async function updateVariante(
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Fehler beim Aktualisieren der Variante:", error);
@@ -410,6 +430,10 @@ export async function deleteVariante(id: number): Promise<{ success: boolean; er
     });
 
     revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Fehler beim Löschen der Variante:", error);
