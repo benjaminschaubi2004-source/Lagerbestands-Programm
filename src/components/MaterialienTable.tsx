@@ -312,7 +312,11 @@ export function MaterialienTable({
                                   {v.istBestand.toLocaleString("de-DE")} Stk.
                                 </td>
                                 <td className="py-2.5 px-4">
-                                  {isCritical ? (
+                                  {v.isBestellt ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+                                      📦 Bestellt{v.bestelltMenge ? ` (${v.bestelltMenge} Stk.)` : ""}
+                                    </span>
+                                  ) : isCritical ? (
                                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">
                                       <AlertTriangle className="w-3 h-3" /> Unter Mindestbestand
                                     </span>

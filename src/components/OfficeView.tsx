@@ -27,8 +27,11 @@ import {
   BarChart3,
   TableProperties,
   Car,
+  ShoppingBag,
+  PackageCheck,
 } from "lucide-react";
 import { useToast } from "./Toast";
+import { BestellModal, ModalVarianteTarget } from "./BestellModal";
 
 interface OfficeViewProps {
   materialien: MaterialWithVarianten[];
@@ -36,7 +39,7 @@ interface OfficeViewProps {
   initialAutos?: AutoItem[];
 }
 
-type StatusFilterType = "ALL" | "CRITICAL" | "OUT_OF_STOCK" | "OK";
+type StatusFilterType = "ALL" | "CRITICAL" | "OUT_OF_STOCK" | "ORDERED" | "OK";
 type SortField = "material" | "variante" | "artikelnummer" | "mindestbestand" | "istBestand" | "status";
 type SortDirection = "asc" | "desc";
 
@@ -51,8 +54,12 @@ interface FlatVarianteRow {
   mindestbestand: number;
   istBestand: number;
   diff: number; // istBestand - mindestbestand
-  isCritical: boolean; // istBestand <= mindestbestand
-  isOutOfStock: boolean; // istBestand === 0
+  isBestellt: boolean;
+  bestelltAm: Date | null;
+  bestelltMenge: number | null;
+  bestelltNotiz: string | null;
+  isCritical: boolean; // istBestand <= mindestbestand && !isBestellt
+  isOutOfStock: boolean; // istBestand === 0 && !isBestellt
 }
 
 export function OfficeView({
@@ -79,6 +86,10 @@ export function OfficeView({
 
   // Kopier-Zustand
   const [copiedArtNr, setCopiedArtNr] = useState<string | null>(null);
+
+  // Bestell-Modal Zustand
+  const [orderModalTarget, setOrderModalTarget] = useState<ModalVarianteTarget | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   // Synchronisieren falls initialMaterialien sich ändern
   React.useEffect(() => {
@@ -127,6 +138,11 @@ export function OfficeView({
     for (const m of materialien) {
       for (const v of m.varianten) {
         const diff = v.istBestand - v.mindestbestand;
+        const isBestellt = Boolean(v.isBestellt);
+        // Sobald ein Material bestellt ist, steht es NICHT MEHR auf kritisch oder ausverkauft!
+        const isOutOfStock = v.istBestand === 0 && !isBestellt;
+        const isCritical = v.istBestand <= v.mindestbestand && !isBestellt;
+
         rows.push({
           materialId: m.id,
           materialName: m.name,
@@ -138,8 +154,12 @@ export function OfficeView({
           mindestbestand: v.mindestbestand,
           istBestand: v.istBestand,
           diff,
-          isCritical: v.istBestand <= v.mindestbestand,
-          isOutOfStock: v.istBestand === 0,
+          isBestellt,
+          bestelltAm: v.bestelltAm ? new Date(v.bestelltAm) : null,
+          bestelltMenge: v.bestelltMenge ?? null,
+          bestelltNotiz: v.bestelltNotiz ?? null,
+          isCritical,
+          isOutOfStock,
         });
       }
     }
@@ -163,7 +183,11 @@ export function OfficeView({
   const totalCount = allVariantenRows.length;
   const criticalCount = useMemo(() => allVariantenRows.filter((r) => r.isCritical).length, [allVariantenRows]);
   const outOfStockCount = useMemo(() => allVariantenRows.filter((r) => r.isOutOfStock).length, [allVariantenRows]);
-  const okCount = totalCount - criticalCount;
+  const orderedCount = useMemo(() => allVariantenRows.filter((r) => r.isBestellt).length, [allVariantenRows]);
+  const okCount = useMemo(
+    () => allVariantenRows.filter((r) => !r.isCritical && !r.isOutOfStock && !r.isBestellt).length,
+    [allVariantenRows]
+  );
 
   // Prüfen, ob irgendein Filter aktiv ist
   const isAnyFilterActive =
@@ -228,7 +252,10 @@ export function OfficeView({
       if (statusFilter === "OUT_OF_STOCK" && !row.isOutOfStock) {
         return false;
       }
-      if (statusFilter === "OK" && row.isCritical) {
+      if (statusFilter === "ORDERED" && !row.isBestellt) {
+        return false;
+      }
+      if (statusFilter === "OK" && (row.isCritical || row.isOutOfStock || row.isBestellt)) {
         return false;
       }
 
@@ -310,7 +337,15 @@ export function OfficeView({
           r.mindestbestand,
           r.istBestand,
           r.diff,
-          escapeCsv(r.isOutOfStock ? "Ausverkauft" : r.isCritical ? "Nachbestellen (Meldebestand unterschritten)" : "Ausreichend"),
+          escapeCsv(
+            r.isBestellt
+              ? `Bestellt (${r.bestelltMenge ? `${r.bestelltMenge} Stk.` : "Menge n.a."}${r.bestelltAm ? `, am ${new Date(r.bestelltAm).toLocaleDateString("de-DE")}` : ""}${r.bestelltNotiz ? ` - ${r.bestelltNotiz}` : ""})`
+              : r.isOutOfStock
+              ? "Ausverkauft"
+              : r.isCritical
+              ? "Nachbestellen (Meldebestand unterschritten)"
+              : "Ausreichend"
+          ),
         ].join(";")
       ),
     ];
@@ -429,12 +464,12 @@ export function OfficeView({
             <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
               Office-Lagerliste & Bestandsübersicht
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold border border-zinc-200 dark:border-zinc-700">
-              Nur Lesezugriff
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800">
+              Bestandsübersicht &amp; Einkauf
             </span>
           </div>
           <p className="text-xs text-zinc-500 mt-1">
-            Vollständige Bestandsübersicht mit Filter- und Exportfunktionen für Einkauf & Lagerleitung.
+            Vollständige Bestandsübersicht mit Filter- und Nachbestellfunktionen für Einkauf & Lagerleitung.
           </p>
         </div>
 
@@ -464,7 +499,7 @@ export function OfficeView({
                 ? "bg-red-100 dark:bg-red-950 border-red-500 dark:border-red-600 ring-2 ring-red-500/30 text-red-900 dark:text-red-100 shadow-xs"
                 : "bg-red-50/70 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 text-red-800 dark:text-red-300 hover:bg-red-100/70"
             }`}
-            title="Nachbestellungen (Bestand <= Mindestbestand) filtern"
+            title="Nachbestellungen (Bestand <= Mindestbestand, noch nicht bestellt) filtern"
           >
             <span className="text-[10px] uppercase font-bold opacity-80 block flex items-center justify-center gap-1">
               <AlertTriangle className="w-3 h-3 text-red-600" />
@@ -483,7 +518,7 @@ export function OfficeView({
                   ? "bg-amber-100 dark:bg-amber-950 border-amber-500 dark:border-amber-600 ring-2 ring-amber-500/30 text-amber-900 dark:text-amber-100 shadow-xs"
                   : "bg-amber-50/70 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 hover:bg-amber-100/70"
               }`}
-              title="Artikel mit Bestand 0 filtern"
+              title="Artikel mit Bestand 0 (noch nicht bestellt) filtern"
             >
               <span className="text-[10px] uppercase font-bold opacity-80 block flex items-center justify-center gap-1">
                 <AlertOctagon className="w-3 h-3 text-amber-600" />
@@ -492,6 +527,24 @@ export function OfficeView({
               <span className="text-sm font-bold">{outOfStockCount}</span>
             </button>
           )}
+
+          {/* Bereits bestellt */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter("ORDERED")}
+            className={`px-3.5 py-2 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === "ORDERED"
+                ? "bg-indigo-100 dark:bg-indigo-950 border-indigo-500 dark:border-indigo-600 ring-2 ring-indigo-500/30 text-indigo-900 dark:text-indigo-100 shadow-xs"
+                : "bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/60 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-100/70"
+            }`}
+            title="Bereits nachbestellte Artikel filtern"
+          >
+            <span className="text-[10px] uppercase font-bold opacity-80 block flex items-center justify-center gap-1">
+              <ShoppingBag className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+              Bestellt
+            </span>
+            <span className="text-sm font-bold">{orderedCount}</span>
+          </button>
 
           {/* Ausreichend */}
           <button
@@ -625,6 +678,18 @@ export function OfficeView({
             )}
             <button
               type="button"
+              onClick={() => setStatusFilter("ORDERED")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                statusFilter === "ORDERED"
+                  ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-indigo-600"
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-indigo-500" />
+              Bestellt ({orderedCount})
+            </button>
+            <button
+              type="button"
               onClick={() => setStatusFilter("OK")}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                 statusFilter === "OK"
@@ -734,13 +799,16 @@ export function OfficeView({
                     {renderSortIndicator("status")}
                   </div>
                 </th>
+
+                {/* Spalte Aktion */}
+                <th className="py-3 px-4 w-36 text-right">Aktion</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {filteredAndSortedRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-14 text-center text-zinc-500">
+                  <td colSpan={7} className="py-14 text-center text-zinc-500">
                     <Filter className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
                     <p className="font-semibold text-zinc-800 dark:text-zinc-200">
                       Keine Positionen für diese Filterkriterien gefunden.
@@ -832,7 +900,23 @@ export function OfficeView({
 
                     {/* Status Badge mit Differenz */}
                     <td className="py-3.5 px-4">
-                      {row.isOutOfStock ? (
+                      {row.isBestellt ? (
+                        <div className="inline-flex flex-col items-start gap-0.5">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 shadow-2xs">
+                            <PackageCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                            Bestellt
+                          </span>
+                          <span className="text-[11px] text-indigo-700 dark:text-indigo-400 font-semibold pl-1">
+                            {row.bestelltMenge ? `${row.bestelltMenge} Stk.` : "Bestellung aktiv"}
+                            {row.bestelltAm ? ` (am ${row.bestelltAm.toLocaleDateString("de-DE")})` : ""}
+                          </span>
+                          {row.bestelltNotiz && (
+                            <span className="text-[10px] text-zinc-500 italic pl-1 line-clamp-1 max-w-[200px]" title={row.bestelltNotiz}>
+                              &quot;{row.bestelltNotiz}&quot;
+                            </span>
+                          )}
+                        </div>
+                      ) : row.isOutOfStock ? (
                         <div className="inline-flex flex-col items-start gap-0.5">
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800">
                             <AlertOctagon className="w-3.5 h-3.5 text-red-600" />
@@ -857,6 +941,62 @@ export function OfficeView({
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           Ausreichend (+{row.diff})
                         </span>
+                      )}
+                    </td>
+
+                    {/* Aktion / Bestellen */}
+                    <td className="py-3.5 px-4 text-right">
+                      {row.isBestellt ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrderModalTarget({
+                              id: row.varianteId,
+                              artikelnummer: row.artikelnummer,
+                              groesseName: row.varianteName,
+                              materialName: row.materialName,
+                              hersteller: row.hersteller,
+                              istBestand: row.istBestand,
+                              mindestbestand: row.mindestbestand,
+                              isBestellt: true,
+                              bestelltAm: row.bestelltAm,
+                              bestelltMenge: row.bestelltMenge,
+                              bestelltNotiz: row.bestelltNotiz,
+                            });
+                            setIsOrderModalOpen(true);
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                          title="Bestelldetails einsehen, bearbeiten oder Status aufheben"
+                        >
+                          <PackageCheck className="w-3.5 h-3.5" />
+                          <span>Verwalten</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrderModalTarget({
+                              id: row.varianteId,
+                              artikelnummer: row.artikelnummer,
+                              groesseName: row.varianteName,
+                              materialName: row.materialName,
+                              hersteller: row.hersteller,
+                              istBestand: row.istBestand,
+                              mindestbestand: row.mindestbestand,
+                              isBestellt: false,
+                            });
+                            setIsOrderModalOpen(true);
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer ${
+                            row.isOutOfStock || row.isCritical
+                              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-xs hover:shadow-sm"
+                              : "text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+                          }`}
+                          title="Material als bestellt markieren"
+                        >
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <span>Bestellen</span>
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -889,6 +1029,19 @@ export function OfficeView({
       </div>
       </>
       )}
+
+      {/* Modal zum Nachbestellen / Status ändern */}
+      <BestellModal
+        isOpen={isOrderModalOpen}
+        onClose={() => {
+          setIsOrderModalOpen(false);
+          setOrderModalTarget(null);
+        }}
+        variante={orderModalTarget}
+        onSuccess={() => {
+          handleReload();
+        }}
+      />
     </div>
   );
 }

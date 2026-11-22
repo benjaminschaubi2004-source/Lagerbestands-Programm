@@ -54,6 +54,10 @@ model MaterialVariante {
   artikelnummer  String    @unique
   mindestbestand Int       @default(0)
   istBestand     Int       @default(0)
+  isBestellt     Boolean   @default(false)
+  bestelltAm     DateTime?
+  bestelltMenge  Int?
+  bestelltNotiz  String?
   materialId     Int
   material       Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
   groesseId      Int

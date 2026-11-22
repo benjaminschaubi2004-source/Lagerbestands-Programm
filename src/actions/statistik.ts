@@ -11,6 +11,10 @@ export interface VarianteStatistik {
   hersteller: string | null;
   istBestand: number;
   mindestbestand: number;
+  isBestellt?: boolean;
+  bestelltAm?: Date | null;
+  bestelltMenge?: number | null;
+  bestelltNotiz?: string | null;
   isCritical: boolean;
   isOutOfStock: boolean;
   totalZugangMenge: number;
@@ -36,6 +40,7 @@ export interface LagerStatistikData {
   variantenGesamt: number;
   kritischeVarianten: number;
   ausverkaufteVarianten: number;
+  bestellteVarianten: number;
   gesunderBestand: number;
 
   gesamtZugangMenge: number;
@@ -68,6 +73,7 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
     let variantenGesamt = 0;
     let kritischeVarianten = 0;
     let ausverkaufteVarianten = 0;
+    let bestellteVarianten = 0;
 
     let gesamtZugangMenge = 0;
     let gesamtZugangBuchungen = 0;
@@ -95,8 +101,11 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
         hEntry.variantenCount++;
         hEntry.gesamtBestand += v.istBestand;
 
-        const isCritical = v.istBestand <= v.mindestbestand;
-        const isOutOfStock = v.istBestand === 0;
+        const isBestellt = Boolean((v as any).isBestellt);
+        const isCritical = v.istBestand <= v.mindestbestand && !isBestellt;
+        const isOutOfStock = v.istBestand === 0 && !isBestellt;
+
+        if (isBestellt) bestellteVarianten++;
         if (isCritical) kritischeVarianten++;
         if (isOutOfStock) ausverkaufteVarianten++;
 
@@ -140,6 +149,10 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
           hersteller: mat.hersteller,
           istBestand: v.istBestand,
           mindestbestand: v.mindestbestand,
+          isBestellt,
+          bestelltAm: (v as any).bestelltAm ?? null,
+          bestelltMenge: (v as any).bestelltMenge ?? null,
+          bestelltNotiz: (v as any).bestelltNotiz ?? null,
           isCritical,
           isOutOfStock,
           totalZugangMenge: vZugangMenge,
@@ -163,7 +176,7 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
       }))
       .sort((a, b) => b.gesamtBestand - a.gesamtBestand);
 
-    const gesunderBestand = variantenGesamt - kritischeVarianten;
+    const gesunderBestand = variantenGesamt - kritischeVarianten - bestellteVarianten;
 
     return {
       gesamtEinheitenIst,
@@ -171,6 +184,7 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
       variantenGesamt,
       kritischeVarianten,
       ausverkaufteVarianten,
+      bestellteVarianten,
       gesunderBestand,
 
       gesamtZugangMenge,
@@ -190,6 +204,7 @@ export async function getLagerStatistik(): Promise<LagerStatistikData> {
       variantenGesamt: 0,
       kritischeVarianten: 0,
       ausverkaufteVarianten: 0,
+      bestellteVarianten: 0,
       gesunderBestand: 0,
       gesamtZugangMenge: 0,
       gesamtZugangBuchungen: 0,

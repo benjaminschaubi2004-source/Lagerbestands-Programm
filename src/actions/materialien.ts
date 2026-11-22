@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { db, getDbPool } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "@/actions/logs";
 
@@ -9,6 +9,10 @@ export interface MaterialVarianteInfo {
   artikelnummer: string;
   mindestbestand: number;
   istBestand: number;
+  isBestellt?: boolean;
+  bestelltAm?: Date | null;
+  bestelltMenge?: number | null;
+  bestelltNotiz?: string | null;
   materialId: number;
   groesseId: number;
   groesse: {
@@ -573,10 +577,20 @@ export async function bookBestand(
       // Einnahme / Einlagern
       bestandNachher = bestandVorher + menge;
 
+      const isRestocked = bestandNachher >= variante.mindestbestand;
+      const updateData: any = { istBestand: bestandNachher };
+      // Wenn der Mindestbestand wieder erreicht oder überschritten ist, wird der Status "bestellt" automatisch zurückgesetzt
+      if (isRestocked && (variante as any).isBestellt) {
+        updateData.isBestellt = false;
+        updateData.bestelltAm = null;
+        updateData.bestelltMenge = null;
+        updateData.bestelltNotiz = null;
+      }
+
       await db.$transaction([
         db.materialVariante.update({
           where: { id: varianteId },
-          data: { istBestand: bestandNachher },
+          data: updateData,
         }),
         db.buchung.create({
           data: {
@@ -602,6 +616,7 @@ export async function bookBestand(
 
     revalidatePath("/");
     revalidatePath("/techniker");
+    revalidatePath("/monteur");
     revalidatePath("/office");
     revalidatePath("/admin");
     return { success: true, neuerBestand: bestandNachher };
@@ -616,4 +631,173 @@ export async function bookEntnahme(
   menge: number
 ): Promise<{ success: boolean; error?: string; neuerBestand?: number }> {
   return bookBestand(varianteId, menge, "ausgabe");
+}
+
+/* ---------------- OFFICE: MATERIAL-BESTELLSTATUS ---------------- */
+
+export interface OrderMaterialInput {
+  bestelltMenge?: number | null;
+  bestelltNotiz?: string | null;
+}
+
+/**
+ * Setzt den Status einer Material-Variante auf 'isBestellt = true'.
+ * Dadurch gilt sie im Office nicht mehr als kritisch oder ausverkauft.
+ */
+export async function orderMaterialVariante(
+  varianteId: number,
+  options?: OrderMaterialInput
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const id = Number(varianteId);
+    if (!id || isNaN(id)) {
+      return { success: false, error: "Ungültige Varianten-ID." };
+    }
+
+    const menge =
+      options?.bestelltMenge !== undefined && options?.bestelltMenge !== null
+        ? Math.max(1, Math.round(Number(options.bestelltMenge)))
+        : null;
+    const notiz = options?.bestelltNotiz?.trim() || null;
+    const now = new Date();
+
+    let updatedVariante: any = null;
+
+    try {
+      updatedVariante = await db.materialVariante.update({
+        where: { id },
+        data: {
+          isBestellt: true,
+          bestelltAm: now,
+          bestelltMenge: menge,
+          bestelltNotiz: notiz,
+        },
+        include: {
+          material: true,
+          groesse: true,
+        },
+      });
+    } catch (prismaErr) {
+      // Direkter PostgreSQL Fallback
+      const pool = getDbPool();
+      const res = await pool.query(
+        `UPDATE "MaterialVariante" 
+         SET "isBestellt" = true, "bestelltAm" = $1, "bestelltMenge" = $2, "bestelltNotiz" = $3, "updatedAt" = NOW() 
+         WHERE id = $4 
+         RETURNING *`,
+        [now, menge, notiz, id]
+      );
+      if (res.rows.length === 0) {
+        return { success: false, error: "Variante nicht gefunden." };
+      }
+      const mRes = await pool.query(
+        `SELECT m.name as "materialName", g.name as "groesseName" 
+         FROM "MaterialVariante" mv 
+         LEFT JOIN "Material" m ON m.id = mv."materialId" 
+         LEFT JOIN "Groesse" g ON g.id = mv."groesseId" 
+         WHERE mv.id = $1`,
+        [id]
+      );
+      const mRow = mRes.rows[0];
+      updatedVariante = {
+        ...res.rows[0],
+        material: { name: mRow?.materialName || `Material #${res.rows[0].materialId}` },
+        groesse: { name: mRow?.groesseName || "" },
+      };
+    }
+
+    await logActivity({
+      bereich: "OFFICE",
+      aktion: "MATERIAL_BESTELLT",
+      beschreibung: `Material "${updatedVariante.material.name}" (${updatedVariante.groesse.name}) als bestellt markiert.${menge ? ` Bestellmenge: ${menge} Stk.` : ""}`,
+      details: `Art.-Nr: ${updatedVariante.artikelnummer}${notiz ? ` | Notiz: ${notiz}` : ""}`,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/office");
+    revalidatePath("/admin");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Fehler beim Bestellen der Variante:", error);
+    return { success: false, error: "Bestellstatus konnte nicht gesetzt werden." };
+  }
+}
+
+/**
+ * Hebt den 'isBestellt'-Status auf (Stornierung oder manuelle Rücksetzung).
+ */
+export async function cancelOrderMaterialVariante(
+  varianteId: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const id = Number(varianteId);
+    if (!id || isNaN(id)) {
+      return { success: false, error: "Ungültige Varianten-ID." };
+    }
+
+    let updatedVariante: any = null;
+
+    try {
+      updatedVariante = await db.materialVariante.update({
+        where: { id },
+        data: {
+          isBestellt: false,
+          bestelltAm: null,
+          bestelltMenge: null,
+          bestelltNotiz: null,
+        },
+        include: {
+          material: true,
+          groesse: true,
+        },
+      });
+    } catch (prismaErr) {
+      const pool = getDbPool();
+      const res = await pool.query(
+        `UPDATE "MaterialVariante" 
+         SET "isBestellt" = false, "bestelltAm" = NULL, "bestelltMenge" = NULL, "bestelltNotiz" = NULL, "updatedAt" = NOW() 
+         WHERE id = $1 
+         RETURNING *`,
+        [id]
+      );
+      if (res.rows.length === 0) {
+        return { success: false, error: "Variante nicht gefunden." };
+      }
+      const mRes = await pool.query(
+        `SELECT m.name as "materialName", g.name as "groesseName" 
+         FROM "MaterialVariante" mv 
+         LEFT JOIN "Material" m ON m.id = mv."materialId" 
+         LEFT JOIN "Groesse" g ON g.id = mv."groesseId" 
+         WHERE mv.id = $1`,
+        [id]
+      );
+      const mRow = mRes.rows[0];
+      updatedVariante = {
+        ...res.rows[0],
+        material: { name: mRow?.materialName || `Material #${res.rows[0].materialId}` },
+        groesse: { name: mRow?.groesseName || "" },
+      };
+    }
+
+    await logActivity({
+      bereich: "OFFICE",
+      aktion: "BESTELLUNG_STORNO",
+      beschreibung: `Bestell-Status für "${updatedVariante.material.name}" (${updatedVariante.groesse.name}) aufgehoben.`,
+      details: `Art.-Nr: ${updatedVariante.artikelnummer}`,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/office");
+    revalidatePath("/admin");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Fehler beim Zurücksetzen des Bestellstatus:", error);
+    return { success: false, error: "Bestellstatus konnte nicht aufgehoben werden." };
+  }
 }
