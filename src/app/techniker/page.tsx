@@ -1,0 +1,30 @@
+import { getMaterialien, getBuchungen } from "@/actions/materialien";
+import { getGroessen } from "@/actions/groessen";
+import { protectRoute } from "@/lib/auth";
+import { TechnikerClientPage } from "@/components/TechnikerClientPage";
+
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Techniker-Assistent – Lagerliste",
+  description: "Mobile Materialauswahl, Einnahme und Ausgabe für Techniker",
+};
+
+export default async function TechnikerPage() {
+  const { currentUser } = await protectRoute(["TECHNIKER", "ADMIN"], "/techniker");
+
+  const [materialien, groessen, buchungen] = await Promise.all([
+    getMaterialien(),
+    getGroessen(),
+    getBuchungen(30),
+  ]);
+
+  return (
+    <TechnikerClientPage
+      initialMaterialien={materialien}
+      initialGroessen={groessen}
+      initialBuchungen={buchungen}
+      currentUser={currentUser}
+    />
+  );
+}

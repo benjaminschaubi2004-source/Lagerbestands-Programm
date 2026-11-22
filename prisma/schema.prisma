@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int           @id @default(autoincrement())
+  username  String        @unique
+  name      String
+  password  String
+  role      String        // "TECHNIKER" | "OFFICE" | "ADMIN"
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  logs      ActivityLog[]
+}
+
+model ActivityLog {
+  id           Int      @id @default(autoincrement())
+  bereich      String   // "TECHNIKER" | "OFFICE" | "ADMIN"
+  aktion       String   // z.B. "AUSGABE", "EINNAHME", "USER_CREATE", "USER_UPDATE", "USER_DELETE", etc.
+  beschreibung String
+  username     String   // Name des angemeldeten Benutzers
+  userRole     String   // Rolle des Benutzers zum Zeitpunkt der Aktion
+  userId       Int?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  details      String?  // Optionale Zusatzinformationen
+  createdAt    DateTime @default(now())
+}
+
+model Groesse {
+  id        Int                @id @default(autoincrement())
+  name      String             @unique
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  varianten MaterialVariante[]
+}
+
+model Material {
+  id           Int                @id @default(autoincrement())
+  name         String             @unique
+  hersteller   String?
+  beschreibung String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  varianten    MaterialVariante[]
+}
+
+model MaterialVariante {
+  id             Int       @id @default(autoincrement())
+  artikelnummer  String    @unique
+  mindestbestand Int       @default(0)
+  istBestand     Int       @default(0)
+  materialId     Int
+  material       Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  groesseId      Int
+  groesse        Groesse   @relation(fields: [groesseId], references: [id], onDelete: Restrict)
+  buchungen      Buchung[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([materialId, groesseId])
+}
+
+model Buchung {
+  id             Int              @id @default(autoincrement())
+  typ            String
+  menge          Int
+  bestandVorher  Int
+  bestandNachher Int
+  varianteId     Int
+  variante       MaterialVariante @relation(fields: [varianteId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+}
