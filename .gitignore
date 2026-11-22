@@ -50,3 +50,6 @@ next-env.d.ts
 *.db-journal
 *.db-wal
 *.db-shm
+
+# local helper scripts
+push.bat
