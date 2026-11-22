@@ -6,6 +6,7 @@ import { GroesseWithCount, getGroessen } from "@/actions/groessen";
 import { UserInfo, getUsers } from "@/actions/users";
 import { ActivityLogItem, getActivityLogs } from "@/actions/logs";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
+import { AutoItem, getAutos } from "@/actions/autos";
 import type { SessionUser } from "@/actions/auth";
 import { TechnikerFinder } from "./TechnikerFinder";
 import { MaterialienTable } from "./MaterialienTable";
@@ -13,6 +14,7 @@ import { GroessenManager } from "./GroessenManager";
 import { UserManager } from "./UserManager";
 import { ActivityLogView } from "./ActivityLogView";
 import { StatistikView } from "./StatistikView";
+import { AutosView } from "./AutosView";
 import { UserHeaderBadge } from "./UserHeaderBadge";
 import { AndroidAppView } from "./AndroidAppView";
 import { ToastProvider } from "./Toast";
@@ -30,6 +32,7 @@ import {
   Smartphone,
   Download,
   BarChart3,
+  Car,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -38,6 +41,7 @@ interface DashboardProps {
   initialUsers: UserInfo[];
   initialLogs: ActivityLogItem[];
   initialStatistik?: LagerStatistikData | null;
+  initialAutos?: AutoItem[];
   currentUser?: SessionUser | null;
   isAdmin?: boolean;
 }
@@ -48,11 +52,12 @@ export function Dashboard({
   initialUsers,
   initialLogs,
   initialStatistik,
+  initialAutos,
   currentUser,
   isAdmin = true,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "materialien" | "statistik" | "groessen" | "users" | "logs" | "techniker" | "apk"
+    "materialien" | "statistik" | "autos" | "groessen" | "users" | "logs" | "techniker" | "apk"
   >("materialien");
 
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
@@ -60,19 +65,21 @@ export function Dashboard({
   const [users, setUsers] = useState<UserInfo[]>(initialUsers);
   const [logs, setLogs] = useState<ActivityLogItem[]>(initialLogs);
   const [statistik, setStatistik] = useState<LagerStatistikData | null>(initialStatistik || null);
+  const [autos, setAutos] = useState<AutoItem[]>(initialAutos || []);
   const [buchungen, setBuchungen] = useState<BuchungInfo[]>([]);
   const [isPending, startTransition] = useTransition();
 
   const reloadData = () => {
     startTransition(async () => {
       try {
-        const [mats, grs, buchs, usrs, lgs, stat] = await Promise.all([
+        const [mats, grs, buchs, usrs, lgs, stat, freshAutos] = await Promise.all([
           getMaterialien(),
           getGroessen(),
           getBuchungen(30),
           getUsers(),
           getActivityLogs({ limit: 150 }),
           getLagerStatistik(),
+          getAutos(),
         ]);
         setMaterialien(mats);
         setGroessen(grs);
@@ -80,6 +87,7 @@ export function Dashboard({
         setUsers(usrs);
         setLogs(lgs);
         setStatistik(stat);
+        setAutos(freshAutos);
       } catch (err) {
         console.error("Fehler beim Aktualisieren der Daten:", err);
       }
@@ -91,7 +99,10 @@ export function Dashboard({
     if (!initialStatistik) {
       getLagerStatistik().then(setStatistik).catch(() => {});
     }
-  }, [initialStatistik]);
+    if (!initialAutos) {
+      getAutos().then(setAutos).catch(() => {});
+    }
+  }, [initialStatistik, initialAutos]);
 
   const totalVarianten = materialien.reduce((acc, m) => acc + m.varianten.length, 0);
 
@@ -188,6 +199,24 @@ export function Dashboard({
                 <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold">
                   Neu
                 </span>
+              </button>
+
+              {/* 3. Tab: Auto's (Fuhrpark) */}
+              <button
+                onClick={() => setActiveTab("autos")}
+                className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer shrink-0 ${
+                  activeTab === "autos"
+                    ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                }`}
+              >
+                <Car className="w-4 h-4 text-blue-500" />
+                <span>Auto&apos;s (Fuhrpark)</span>
+                {autos.length > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-semibold">
+                    {autos.length}
+                  </span>
+                )}
               </button>
 
               {/* 3. Tab: Größen */}
@@ -288,12 +317,14 @@ export function Dashboard({
                 <p>Lade Bestands- und Bewegungsstatistiken...</p>
               </div>
             )
+          ) : activeTab === "autos" ? (
+            <AutosView initialAutos={autos} />
           ) : activeTab === "groessen" ? (
             <GroessenManager initialGroessen={groessen} onChanged={reloadData} />
           ) : activeTab === "users" ? (
             <UserManager initialUsers={users} onChanged={reloadData} />
           ) : activeTab === "logs" ? (
-            <ActivityLogView initialLogs={logs} />
+            <ActivityLogView initialLogs={logs} onLogsCleared={reloadData} />
           ) : activeTab === "apk" ? (
             <AndroidAppView />
           ) : (
@@ -302,6 +333,7 @@ export function Dashboard({
               groessen={groessen}
               buchungen={buchungen}
               onDataChanged={reloadData}
+              isAdmin={isAdmin}
             />
           )}
         </main>

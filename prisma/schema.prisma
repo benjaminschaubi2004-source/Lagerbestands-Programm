@@ -75,3 +75,17 @@ model Buchung {
   variante       MaterialVariante @relation(fields: [varianteId], references: [id], onDelete: Cascade)
   createdAt      DateTime         @default(now())
 }
+
+model Auto {
+  id             Int       @id @default(autoincrement())
+  name           String    // Name oder Bezeichnung (z.B. "Caddy 1", "Werkstattwagen")
+  kennzeichen    String?   // Kennzeichen (z.B. "B-XY 1234")
+  modell         String?   // Hersteller/Modell (z.B. "VW Caddy Maxi", "Mercedes Sprinter")
+  defekte        String?   // Mögliche Defekte / Mängel
+  tuevTermin     DateTime? // Nächster TÜV-Termin
+  anmerkungen    String?   // Anmerkungen & Notizen
+  kilometerstand Int?      // Aktueller Kilometerstand
+  status         String    @default("BEREIT") // "BEREIT" | "DEFEKT" | "WERKSTATT" | "TUEV_FAELLIG"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}

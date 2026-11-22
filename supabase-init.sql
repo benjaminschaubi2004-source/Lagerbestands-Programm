@@ -44,6 +44,25 @@ CREATE TABLE IF NOT EXISTS "MaterialVariante" (
     CONSTRAINT "MaterialVariante_pkey" PRIMARY KEY ("id")
 );
 
+-- Tabelle: Auto (Fuhrpark-Verwaltung für Office)
+CREATE TABLE IF NOT EXISTS "Auto" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "kennzeichen" TEXT,
+    "modell" TEXT,
+    "defekte" TEXT,
+    "tuevTermin" TIMESTAMP(3),
+    "anmerkungen" TEXT,
+    "kilometerstand" INTEGER,
+    "status" TEXT NOT NULL DEFAULT 'BEREIT',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Auto_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX IF NOT EXISTS "Auto_name_idx" ON "Auto"("name");
+
 -- 2. Indizes & Constraints anlegen
 -- --------------------------------------------------------------------
 

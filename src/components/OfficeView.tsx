@@ -3,7 +3,9 @@
 import React, { useState, useMemo, useTransition } from "react";
 import { MaterialWithVarianten, getMaterialien } from "@/actions/materialien";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
+import { AutoItem, getAutos } from "@/actions/autos";
 import { StatistikView } from "./StatistikView";
+import { AutosView } from "./AutosView";
 import {
   Search,
   Filter,
@@ -24,12 +26,14 @@ import {
   AlertOctagon,
   BarChart3,
   TableProperties,
+  Car,
 } from "lucide-react";
 import { useToast } from "./Toast";
 
 interface OfficeViewProps {
   materialien: MaterialWithVarianten[];
   initialStatistik?: LagerStatistikData | null;
+  initialAutos?: AutoItem[];
 }
 
 type StatusFilterType = "ALL" | "CRITICAL" | "OUT_OF_STOCK" | "OK";
@@ -54,11 +58,13 @@ interface FlatVarianteRow {
 export function OfficeView({
   materialien: initialMaterialien,
   initialStatistik,
+  initialAutos,
 }: OfficeViewProps) {
   const { toast } = useToast();
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
-  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik">("tabelle");
+  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos">("tabelle");
   const [statistikData, setStatistikData] = useState<LagerStatistikData | null>(initialStatistik || null);
+  const [autosData, setAutosData] = useState<AutoItem[]>(initialAutos || []);
   const [isPending, startTransition] = useTransition();
 
   // Filter-Zustände
@@ -87,17 +93,27 @@ export function OfficeView({
     }
   }, [initialStatistik]);
 
+  React.useEffect(() => {
+    if (initialAutos) {
+      setAutosData(initialAutos);
+    } else {
+      getAutos().then(setAutosData).catch(() => {});
+    }
+  }, [initialAutos]);
+
   // Daten neu laden (Live-Refresh)
   const handleReload = () => {
     startTransition(async () => {
       try {
-        const [freshMats, freshStat] = await Promise.all([
+        const [freshMats, freshStat, freshAutos] = await Promise.all([
           getMaterialien(),
           getLagerStatistik(),
+          getAutos(),
         ]);
         setMaterialien(freshMats);
         setStatistikData(freshStat);
-        toast("Bestands- und Statistikdaten aktualisiert.");
+        setAutosData(freshAutos);
+        toast("Bestands-, Statistik- und Fahrzeugdaten aktualisiert.");
       } catch (err) {
         toast("Fehler beim Aktualisieren der Daten.", "error");
       }
@@ -352,6 +368,30 @@ export function OfficeView({
             <BarChart3 className="w-4 h-4" />
             <span>📊 Bestands- & Bewegungsstatistik</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveOfficeTab("autos")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeOfficeTab === "autos"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            <Car className="w-4 h-4" />
+            <span>🚗 Auto&apos;s</span>
+            {autosData.length > 0 && (
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeOfficeTab === "autos"
+                    ? "bg-white/20 text-white"
+                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300"
+                }`}
+              >
+                {autosData.length}
+              </span>
+            )}
+          </button>
         </div>
 
         <button
@@ -366,7 +406,9 @@ export function OfficeView({
         </button>
       </div>
 
-      {activeOfficeTab === "statistik" ? (
+      {activeOfficeTab === "autos" ? (
+        <AutosView initialAutos={autosData} />
+      ) : activeOfficeTab === "statistik" ? (
         statistikData ? (
           <StatistikView initialData={statistikData} userRole="OFFICE" />
         ) : (

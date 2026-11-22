@@ -51,5 +51,8 @@ next-env.d.ts
 *.db-wal
 *.db-shm
 
+# local binaries
+*.apk
+
 # local helper scripts
 push.bat

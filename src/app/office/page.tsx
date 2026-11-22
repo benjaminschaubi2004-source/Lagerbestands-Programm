@@ -1,5 +1,6 @@
 import { getMaterialien } from "@/actions/materialien";
 import { getLagerStatistik } from "@/actions/statistik";
+import { getAutos } from "@/actions/autos";
 import { protectRoute } from "@/lib/auth";
 import { OfficeView } from "@/components/OfficeView";
 import { ToastProvider } from "@/components/Toast";
@@ -11,15 +12,16 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Office-Übersicht – Lagerliste",
-  description: "Readonly-Bestandsübersicht aller Materialien und Varianten",
+  description: "Readonly-Bestandsübersicht, Statistiken und Fuhrpark/Autos",
 };
 
 export default async function OfficePage() {
   const { currentUser } = await protectRoute(["OFFICE", "ADMIN"], "/office");
 
-  const [materialien, statistik] = await Promise.all([
+  const [materialien, statistik, autos] = await Promise.all([
     getMaterialien(),
     getLagerStatistik(),
+    getAutos(),
   ]);
 
   return (
@@ -36,10 +38,10 @@ export default async function OfficePage() {
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-lg tracking-tight">Lagerliste Office</span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-medium border border-blue-200 dark:border-blue-800">
-                    Read-Only
+                    Office
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500">Material- und Variantenübersicht</p>
+                <p className="text-xs text-zinc-500">Material- und Variantenübersicht, Statistiken & Fuhrpark</p>
               </div>
             </div>
 
@@ -59,7 +61,11 @@ export default async function OfficePage() {
 
         {/* Office Content */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <OfficeView materialien={materialien} initialStatistik={statistik} />
+          <OfficeView
+            materialien={materialien}
+            initialStatistik={statistik}
+            initialAutos={autos}
+          />
         </main>
       </div>
     </ToastProvider>

@@ -3,6 +3,7 @@ import { getGroessen } from "@/actions/groessen";
 import { getUsers } from "@/actions/users";
 import { getActivityLogs } from "@/actions/logs";
 import { getLagerStatistik } from "@/actions/statistik";
+import { getAutos } from "@/actions/autos";
 import { protectRoute } from "@/lib/auth";
 import { Dashboard } from "@/components/Dashboard";
 
@@ -16,12 +17,13 @@ export const metadata = {
 export default async function AdminPage() {
   const { currentUser } = await protectRoute(["ADMIN"], "/admin");
 
-  const [materialien, groessen, users, logs, statistik] = await Promise.all([
+  const [materialien, groessen, users, logs, statistik, autos] = await Promise.all([
     getMaterialien(),
     getGroessen(),
     getUsers(),
     getActivityLogs({ limit: 150 }),
     getLagerStatistik(),
+    getAutos(),
   ]);
 
   return (
@@ -31,6 +33,7 @@ export default async function AdminPage() {
       initialUsers={users}
       initialLogs={logs}
       initialStatistik={statistik}
+      initialAutos={autos}
       currentUser={currentUser}
       isAdmin={true}
     />

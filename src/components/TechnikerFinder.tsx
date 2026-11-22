@@ -24,9 +24,12 @@ import {
   Clock,
   ArrowRight,
   X,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { VarianteModal } from "./VarianteModal";
+import { ConfirmModal } from "./ConfirmModal";
+import { clearAndBackupAllLogs } from "@/actions/logs";
 
 interface TechnikerFinderProps {
   materialien: MaterialWithVarianten[];
@@ -34,6 +37,7 @@ interface TechnikerFinderProps {
   buchungen?: BuchungInfo[];
   onDataChanged: () => void;
   isStandaloneMobile?: boolean;
+  isAdmin?: boolean;
 }
 
 export function TechnikerFinder({
@@ -42,8 +46,29 @@ export function TechnikerFinder({
   buchungen = [],
   onDataChanged,
   isStandaloneMobile = false,
+  isAdmin = false,
 }: TechnikerFinderProps) {
   const { toast } = useToast();
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearLogs = async () => {
+    setIsClearing(true);
+    try {
+      const res = await clearAndBackupAllLogs();
+      if (res.success) {
+        toast(`Logs erfolgreich geleert! Backup erstellt: ${res.backupFileName}`);
+        setIsClearModalOpen(false);
+        onDataChanged();
+      } else {
+        toast(res.message || "Fehler beim Leeren der Logs.", "error");
+      }
+    } catch {
+      toast("Fehler beim Ausführen der Aktion.", "error");
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   // Aktiver Tab auf Mobile: "buchen" (Material buchen) oder "journal" (Eingänge & Ausgänge)
   const [activeMobileView, setActiveMobileView] = useState<"buchen" | "journal">("buchen");
@@ -509,13 +534,27 @@ export function TechnikerFinder({
               </h3>
               <p className="text-xs text-zinc-500">Live-Protokoll aller Lagerbewegungen</p>
             </div>
-            <button
-              type="button"
-              onClick={onDataChanged}
-              className="min-h-[38px] px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline active:bg-indigo-50 dark:active:bg-indigo-950 rounded-lg cursor-pointer touch-manipulation"
-            >
-              Aktualisieren
-            </button>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setIsClearModalOpen(true)}
+                  disabled={isClearing}
+                  className="min-h-[38px] px-2.5 py-1 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  title="Buchungs- und Aktivitätslogs leeren und Backup erstellen"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Log leeren & sichern</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onDataChanged}
+                className="min-h-[38px] px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline active:bg-indigo-50 dark:active:bg-indigo-950 rounded-lg cursor-pointer touch-manipulation"
+              >
+                Aktualisieren
+              </button>
+            </div>
           </div>
 
           {buchungen.length === 0 ? (
@@ -601,6 +640,19 @@ export function TechnikerFinder({
           onSaved={onDataChanged}
         />
       )}
+
+      {/* Modal: Buchungs- und Aktivitäts-Log leeren Bestätigung */}
+      <ConfirmModal
+        isOpen={isClearModalOpen}
+        title="Buchungs- und Aktivitäts-Logs leeren?"
+        message="Möchtest du das gesamte Buchungs-Journal (Eingänge & Ausgänge) sowie das Aktivitäts-Log leeren? Vor dem Leeren wird automatisch ein vollständiges, lesbares Backup aller Daten im Projektordner ('backups/logs/') erstellt."
+        confirmText="Logs sichern & leeren"
+        cancelText="Abbrechen"
+        isDestructive={true}
+        isLoading={isClearing}
+        onConfirm={handleClearLogs}
+        onCancel={() => setIsClearModalOpen(false)}
+      />
     </div>
   );
 }
