@@ -34,9 +34,15 @@ export function getDbPool(): Pool {
   return pool;
 }
 
+const DB_SCHEMA_VERSION = "2026-11-22-v4";
+
 export function getPrismaClient(): PrismaClient {
-  // Falls die gecachte Instanz noch aus der Zeit vor Auto stammt, verwerfen
-  if (globalForPrisma.prisma && (globalForPrisma.prisma as any).auto) {
+  // Verwirft veraltete gecachte Instanzen bei Schema-Änderungen
+  if (
+    globalForPrisma.prisma &&
+    (globalForPrisma as any)._schemaVersion === DB_SCHEMA_VERSION &&
+    (globalForPrisma.prisma as any).auto
+  ) {
     return globalForPrisma.prisma;
   }
 
@@ -46,6 +52,7 @@ export function getPrismaClient(): PrismaClient {
 
   if (process.env.NODE_ENV !== "production") {
     globalForPrisma.prisma = client;
+    (globalForPrisma as any)._schemaVersion = DB_SCHEMA_VERSION;
   }
 
   return client;

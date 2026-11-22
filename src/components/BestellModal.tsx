@@ -14,6 +14,7 @@ import {
   Building2,
   Clock,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { orderMaterialVariante, cancelOrderMaterialVariante } from "@/actions/materialien";
@@ -32,24 +33,34 @@ export interface ModalVarianteTarget {
   bestelltNotiz?: string | null;
 }
 
+export interface OrderSuccessPayload {
+  id: number;
+  isBestellt: boolean;
+  bestelltAm?: Date | null;
+  bestelltMenge?: number | null;
+  bestelltNotiz?: string | null;
+}
+
 interface BestellModalProps {
   isOpen: boolean;
   onClose: () => void;
   variante: ModalVarianteTarget | null;
-  onSuccess?: () => void;
+  onSuccess?: (payload: OrderSuccessPayload) => void;
 }
 
 export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellModalProps) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
-  const [bestellMenge, setBestellMenge] = useState<number>(1);
+  const [bestellMenge, setBestellMenge] = useState<number | string>(1);
   const [bestelltNotiz, setBestelltNotiz] = useState<string>("");
 
   useEffect(() => {
     if (variante) {
       if (variante.isBestellt) {
-        setBestellMenge(variante.bestelltMenge ?? Math.max(1, variante.mindestbestand - variante.istBestand));
+        setBestellMenge(
+          variante.bestelltMenge ?? Math.max(1, variante.mindestbestand - variante.istBestand)
+        );
         setBestelltNotiz(variante.bestelltNotiz ?? "");
       } else {
         const empfohleneMenge = Math.max(1, variante.mindestbestand - variante.istBestand);
@@ -63,64 +74,95 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
 
   const fehlbestand = Math.max(0, variante.mindestbestand - variante.istBestand);
 
-  const handleOrderSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (bestellMenge <= 0) {
-      toast("Bitte eine gültige Bestellmenge (mindestens 1) angeben.", "error");
-      return;
+  const handleOrderSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
+
+    const parsedMenge = Math.max(1, parseInt(String(bestellMenge), 10) || 1);
 
     startTransition(async () => {
       try {
+        const trimmedNotiz = bestelltNotiz.trim() || null;
         const res = await orderMaterialVariante(variante.id, {
-          bestelltMenge: bestellMenge,
-          bestelltNotiz: bestelltNotiz.trim() || null,
+          bestelltMenge: parsedMenge,
+          bestelltNotiz: trimmedNotiz,
         });
 
         if (res.success) {
           toast(`"${variante.materialName} (${variante.groesseName})" erfolgreich auf "Bestellt" gesetzt.`);
-          if (onSuccess) onSuccess();
+          if (onSuccess) {
+            onSuccess({
+              id: variante.id,
+              isBestellt: true,
+              bestelltAm: new Date(),
+              bestelltMenge: parsedMenge,
+              bestelltNotiz: trimmedNotiz,
+            });
+          }
           onClose();
         } else {
           toast(res.error || "Fehler beim Setzen des Bestellstatus.", "error");
         }
       } catch (err) {
+        console.error("Fehler bei Bestellung:", err);
         toast("Netzwerkfehler beim Bestellen.", "error");
       }
     });
   };
 
-  const handleCancelOrder = () => {
+  const handleCancelOrder = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     startTransition(async () => {
       try {
         const res = await cancelOrderMaterialVariante(variante.id);
         if (res.success) {
           toast(`Bestellstatus für "${variante.materialName}" aufgehoben.`);
-          if (onSuccess) onSuccess();
+          if (onSuccess) {
+            onSuccess({
+              id: variante.id,
+              isBestellt: false,
+              bestelltAm: null,
+              bestelltMenge: null,
+              bestelltNotiz: null,
+            });
+          }
           onClose();
         } else {
           toast(res.error || "Fehler beim Aufheben des Bestellstatus.", "error");
         }
       } catch (err) {
+        console.error("Fehler beim Aufheben:", err);
         toast("Netzwerkfehler beim Aufheben.", "error");
       }
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div
-        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <form
+        onSubmit={handleOrderSubmit}
         onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800/30">
+        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800/30 shrink-0">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-2xl ${
-              variante.isBestellt
-                ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400"
-                : "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
-            }`}>
+            <div
+              className={`p-2.5 rounded-2xl ${
+                variante.isBestellt
+                  ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400"
+                  : "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
+              }`}
+            >
               {variante.isBestellt ? <PackageCheck className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
             </div>
             <div>
@@ -144,7 +186,7 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
           {/* Artikel Info Box */}
           <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 space-y-3">
             <div className="flex items-start justify-between gap-2">
@@ -175,9 +217,11 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
               </div>
               <div>
                 <span className="text-zinc-400 block font-medium">Ist-Bestand:</span>
-                <span className={`font-bold ${
-                  variante.istBestand === 0 ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-zinc-100"
-                }`}>
+                <span
+                  className={`font-bold ${
+                    variante.istBestand === 0 ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-zinc-100"
+                  }`}
+                >
                   {variante.istBestand} Stk.
                 </span>
               </div>
@@ -209,8 +253,8 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
             </div>
           </div>
 
-          {/* Formular */}
-          <form id="bestell-form" onSubmit={handleOrderSubmit} className="space-y-4">
+          {/* Formularfelder */}
+          <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Bestellmenge (Stück) *
@@ -221,7 +265,7 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
                   min="1"
                   required
                   value={bestellMenge}
-                  onChange={(e) => setBestellMenge(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => setBestellMenge(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm font-semibold border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   placeholder="z.B. 50"
                 />
@@ -250,19 +294,23 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
                 className="w-full px-3.5 py-2.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          </form>
+          </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           {variante.isBestellt ? (
             <button
               type="button"
               onClick={handleCancelOrder}
               disabled={isPending}
-              className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 hover:bg-red-100 border border-red-200 dark:border-red-900/80 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 hover:bg-red-100 border border-red-200 dark:border-red-900/80 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              {isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <RotateCcw className="w-3.5 h-3.5" />
+              )}
               <span>Bestellstatus aufheben (Stornieren)</span>
             </button>
           ) : (
@@ -281,12 +329,14 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
 
             <button
               type="submit"
-              form="bestell-form"
               disabled={isPending}
               className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isPending ? (
-                <span>Wird gespeichert...</span>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Wird gespeichert...</span>
+                </>
               ) : (
                 <>
                   <ShoppingBag className="w-4 h-4" />
@@ -296,7 +346,7 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
             </button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

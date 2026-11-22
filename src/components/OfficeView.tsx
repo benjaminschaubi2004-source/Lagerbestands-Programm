@@ -1038,7 +1038,25 @@ export function OfficeView({
           setOrderModalTarget(null);
         }}
         variante={orderModalTarget}
-        onSuccess={() => {
+        onSuccess={(payload) => {
+          if (payload) {
+            setMaterialien((prev) =>
+              prev.map((m) => ({
+                ...m,
+                varianten: m.varianten.map((v) =>
+                  v.id === payload.id
+                    ? {
+                        ...v,
+                        isBestellt: payload.isBestellt,
+                        bestelltAm: payload.bestelltAm ? new Date(payload.bestelltAm) : null,
+                        bestelltMenge: payload.bestelltMenge ?? null,
+                        bestelltNotiz: payload.bestelltNotiz ?? null,
+                      }
+                    : v
+                ),
+              }))
+            );
+          }
           handleReload();
         }}
       />

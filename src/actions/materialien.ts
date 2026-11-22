@@ -640,6 +640,18 @@ export interface OrderMaterialInput {
   bestelltNotiz?: string | null;
 }
 
+export interface OrderResult {
+  success: boolean;
+  error?: string;
+  variante?: {
+    id: number;
+    isBestellt: boolean;
+    bestelltAm?: Date | null;
+    bestelltMenge?: number | null;
+    bestelltNotiz?: string | null;
+  };
+}
+
 /**
  * Setzt den Status einer Material-Variante auf 'isBestellt = true'.
  * Dadurch gilt sie im Office nicht mehr als kritisch oder ausverkauft.
@@ -647,7 +659,7 @@ export interface OrderMaterialInput {
 export async function orderMaterialVariante(
   varianteId: number,
   options?: OrderMaterialInput
-): Promise<{ success: boolean; error?: string }> {
+): Promise<OrderResult> {
   try {
     const id = Number(varianteId);
     if (!id || isNaN(id)) {
@@ -719,7 +731,16 @@ export async function orderMaterialVariante(
     revalidatePath("/monteur");
     revalidatePath("/techniker");
 
-    return { success: true };
+    return {
+      success: true,
+      variante: {
+        id: Number(updatedVariante.id),
+        isBestellt: true,
+        bestelltAm: now,
+        bestelltMenge: menge,
+        bestelltNotiz: notiz,
+      },
+    };
   } catch (error) {
     console.error("Fehler beim Bestellen der Variante:", error);
     return { success: false, error: "Bestellstatus konnte nicht gesetzt werden." };
@@ -731,7 +752,7 @@ export async function orderMaterialVariante(
  */
 export async function cancelOrderMaterialVariante(
   varianteId: number
-): Promise<{ success: boolean; error?: string }> {
+): Promise<OrderResult> {
   try {
     const id = Number(varianteId);
     if (!id || isNaN(id)) {
@@ -795,7 +816,16 @@ export async function cancelOrderMaterialVariante(
     revalidatePath("/monteur");
     revalidatePath("/techniker");
 
-    return { success: true };
+    return {
+      success: true,
+      variante: {
+        id: Number(updatedVariante.id),
+        isBestellt: false,
+        bestelltAm: null,
+        bestelltMenge: null,
+        bestelltNotiz: null,
+      },
+    };
   } catch (error) {
     console.error("Fehler beim Zurücksetzen des Bestellstatus:", error);
     return { success: false, error: "Bestellstatus konnte nicht aufgehoben werden." };
