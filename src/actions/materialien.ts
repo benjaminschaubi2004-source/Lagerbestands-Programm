@@ -28,6 +28,8 @@ export interface MaterialWithVarianten {
   name: string;
   hersteller: string | null;
   beschreibung: string | null;
+  kategorie?: string | null;
+  einheit?: string | null;
   createdAt: Date;
   updatedAt: Date;
   varianten: MaterialVarianteInfo[];
@@ -41,7 +43,22 @@ export interface CreateVarianteInput {
   istBestand?: number;
 }
 
+/**
+ * Stellt sicher, dass die Spalten "kategorie" und "einheit" in PostgreSQL existieren
+ */
+export async function ensureMaterialColumns(): Promise<void> {
+  const pool = getDbPool();
+  await pool.query(`
+    ALTER TABLE "Material" ADD COLUMN IF NOT EXISTS "kategorie" TEXT DEFAULT 'STANDARD';
+    ALTER TABLE "Material" ADD COLUMN IF NOT EXISTS "einheit" TEXT DEFAULT 'Stk.';
+  `);
+}
+
 export async function getMaterialien(search?: string): Promise<MaterialWithVarianten[]> {
+  try {
+    await ensureMaterialColumns();
+  } catch {}
+
   try {
     const where: any = {};
 
@@ -85,15 +102,25 @@ export async function getMaterialien(search?: string): Promise<MaterialWithVaria
   }
 }
 
-export async function createMaterial(data: {
+export interface CreateMaterialInput {
   name: string;
-  hersteller?: string;
-  beschreibung?: string;
+  hersteller?: string | null;
+  beschreibung?: string | null;
+  kategorie?: string | null;
+  einheit?: string | null;
   varianten?: CreateVarianteInput[];
-}): Promise<{ success: boolean; error?: string; material?: MaterialWithVarianten }> {
+}
+
+export async function createMaterial(data: CreateMaterialInput): Promise<{
+  success: boolean;
+  error?: string;
+  material?: MaterialWithVarianten;
+}> {
   const name = data.name?.trim();
   const hersteller = data.hersteller?.trim() || null;
   const beschreibung = data.beschreibung?.trim() || null;
+  const kategorie = data.kategorie?.trim() || "STANDARD";
+  const einheit = kategorie === "SCHRAUBEN_KLEINKRAM" ? "Pakete" : (data.einheit?.trim() || "Stk.");
 
   if (!name) {
     return { success: false, error: "Der Materialname ist ein Pflichtfeld." };
@@ -154,6 +181,8 @@ export async function createMaterial(data: {
         name,
         hersteller,
         beschreibung,
+        kategorie,
+        einheit,
         ...(validVariantsToCreate.length > 0
           ? {
               varianten: {
@@ -192,17 +221,34 @@ export async function createMaterial(data: {
 
 export async function updateMaterial(
   id: number,
-  data: { name: string; hersteller?: string | null; beschreibung?: string | null }
+  data: {
+    name: string;
+    hersteller?: string | null;
+    beschreibung?: string | null;
+    kategorie?: string | null;
+    einheit?: string | null;
+  }
 ): Promise<{ success: boolean; error?: string }> {
   const name = data.name?.trim();
   const hersteller = data.hersteller !== undefined ? (data.hersteller?.trim() || null) : undefined;
   const beschreibung = data.beschreibung !== undefined ? (data.beschreibung?.trim() || null) : undefined;
+  const kategorie = data.kategorie !== undefined ? (data.kategorie?.trim() || "STANDARD") : undefined;
+  const einheit =
+    kategorie !== undefined
+      ? kategorie === "SCHRAUBEN_KLEINKRAM"
+        ? "Pakete"
+        : data.einheit?.trim() || "Stk."
+      : data.einheit !== undefined
+      ? data.einheit?.trim() || "Stk."
+      : undefined;
 
   if (!name) {
     return { success: false, error: "Der Materialname ist ein Pflichtfeld." };
   }
 
   try {
+    await ensureMaterialColumns();
+
     const duplicate = await db.material.findFirst({
       where: {
         name,
@@ -219,13 +265,15 @@ export async function updateMaterial(
         name,
         ...(hersteller !== undefined ? { hersteller } : {}),
         ...(beschreibung !== undefined ? { beschreibung } : {}),
+        ...(kategorie !== undefined ? { kategorie } : {}),
+        ...(einheit !== undefined ? { einheit } : {}),
       },
     });
 
     await logActivity({
       bereich: "ADMIN",
       aktion: "MATERIAL_UPDATE",
-      beschreibung: `Material ID #${id} aktualisiert (Neuer Name: "${name}"${hersteller ? `, Hersteller: "${hersteller}"` : ""}).`,
+      beschreibung: `Material ID #${id} aktualisiert ("${name}"${hersteller ? `, Hersteller: "${hersteller}"` : ""}${kategorie ? `, Tag: "${kategorie}"` : ""}).`,
     });
 
     revalidatePath("/");
@@ -237,6 +285,49 @@ export async function updateMaterial(
   } catch (error) {
     console.error("Fehler beim Aktualisieren des Materials:", error);
     return { success: false, error: "Material konnte nicht aktualisiert werden." };
+  }
+}
+
+/**
+ * Tag / Zähleinheit schnell umschalten ("STANDARD" <-> "SCHRAUBEN_KLEINKRAM")
+ */
+export async function setMaterialKategorie(
+  id: number,
+  kategorie: "STANDARD" | "SCHRAUBEN_KLEINKRAM"
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await ensureMaterialColumns();
+    const einheit = kategorie === "SCHRAUBEN_KLEINKRAM" ? "Pakete" : "Stk.";
+
+    try {
+      await db.material.update({
+        where: { id },
+        data: { kategorie, einheit },
+      });
+    } catch {
+      const pool = getDbPool();
+      await pool.query('UPDATE "Material" SET "kategorie" = $1, "einheit" = $2, "updatedAt" = NOW() WHERE id = $3', [
+        kategorie,
+        einheit,
+        id,
+      ]);
+    }
+
+    await logActivity({
+      bereich: "ADMIN",
+      aktion: "MATERIAL_TAG_UPDATE",
+      beschreibung: `Material ID #${id} Tag geändert auf "${kategorie === "SCHRAUBEN_KLEINKRAM" ? "Schrauben/Kleinkram (Pakete)" : "Standard (Stück)"}".`,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("Fehler beim Setzen des Tags:", err);
+    return { success: false, error: err.message || "Fehler beim Setzen des Tags." };
   }
 }
 

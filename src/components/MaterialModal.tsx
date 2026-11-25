@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { MaterialWithVarianten, createMaterial, updateMaterial } from "@/actions/materialien";
 import { GroesseWithCount } from "@/actions/groessen";
-import { X, Package, Bookmark, AlignLeft, Hash, Layers, Plus, Building2 } from "lucide-react";
+import { X, Package, Bookmark, AlignLeft, Hash, Layers, Plus, Building2, Tag } from "lucide-react";
 import { useToast } from "./Toast";
 
 interface MaterialModalProps {
@@ -29,6 +29,7 @@ export function MaterialModal({
   const [name, setName] = useState("");
   const [hersteller, setHersteller] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
+  const [kategorie, setKategorie] = useState<"STANDARD" | "SCHRAUBEN_KLEINKRAM">("STANDARD");
 
   // Initiale Variante beim Neuanlegen
   const [createInitialVariante, setCreateInitialVariante] = useState(true);
@@ -49,11 +50,15 @@ export function MaterialModal({
       setName(materialToEdit.name);
       setHersteller(materialToEdit.hersteller || "");
       setBeschreibung(materialToEdit.beschreibung || "");
+      setKategorie(
+        materialToEdit.kategorie === "SCHRAUBEN_KLEINKRAM" ? "SCHRAUBEN_KLEINKRAM" : "STANDARD"
+      );
       setCreateInitialVariante(false);
     } else {
       setName(initialName || "");
       setHersteller("");
       setBeschreibung("");
+      setKategorie("STANDARD");
       setCreateInitialVariante(true);
       if (groessen.length > 0) {
         setGroesseId(groessen[0].id);
@@ -105,12 +110,16 @@ export function MaterialModal({
         name: matName,
         hersteller: hersteller.trim() || null,
         beschreibung,
+        kategorie,
+        einheit: kategorie === "SCHRAUBEN_KLEINKRAM" ? "Pakete" : "Stk.",
       });
     } else {
       res = await createMaterial({
         name: matName,
         hersteller: hersteller.trim() || undefined,
         beschreibung,
+        kategorie,
+        einheit: kategorie === "SCHRAUBEN_KLEINKRAM" ? "Pakete" : "Stk.",
         varianten: createInitialVariante
           ? [
               {
@@ -221,6 +230,58 @@ export function MaterialModal({
               onChange={(e) => setBeschreibung(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             />
+          </div>
+
+          {/* Tag & Zähleinheit (Standard vs. Schrauben/Kleinkram in Paketen) */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-zinc-400" />
+                Artikel-Tag & Zähleinheit
+              </span>
+              <span
+                className={`text-[11px] font-bold ${
+                  kategorie === "SCHRAUBEN_KLEINKRAM"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-zinc-500"
+                }`}
+              >
+                {kategorie === "SCHRAUBEN_KLEINKRAM" ? "Zählung: Pakete" : "Zählung: Stück (Stk.)"}
+              </span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setKategorie("STANDARD")}
+                className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
+                  kategorie === "STANDARD"
+                    ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 font-bold"
+                    : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300"
+                }`}
+              >
+                <span className="text-xs">Standard-Artikel</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-normal mt-0.5">
+                  Wird in Stück (Stk.) gezählt
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setKategorie("SCHRAUBEN_KLEINKRAM")}
+                className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
+                  kategorie === "SCHRAUBEN_KLEINKRAM"
+                    ? "bg-amber-50 dark:bg-amber-950/60 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-500/20 font-bold"
+                    : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300"
+                }`}
+              >
+                <span className="text-xs flex items-center gap-1">
+                  <span>🔩 Schrauben/Kleinkram</span>
+                </span>
+                <span className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold mt-0.5">
+                  Wird nur in Paketen gezählt
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Initiale Variante beim Neuanlegen */}

@@ -6,6 +6,7 @@ import {
   MaterialVarianteInfo,
   deleteMaterial,
   deleteVariante,
+  setMaterialKategorie,
 } from "@/actions/materialien";
 import { GroesseWithCount } from "@/actions/groessen";
 import {
@@ -20,6 +21,7 @@ import {
   ChevronRight,
   AlertTriangle,
   PlusCircle,
+  Tag,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { MaterialModal } from "./MaterialModal";
@@ -214,6 +216,12 @@ export function MaterialienTable({
                             <span>{m.hersteller}</span>
                           </span>
                         )}
+                        {m.kategorie === "SCHRAUBEN_KLEINKRAM" && (
+                          <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-300 dark:border-amber-700 flex items-center gap-1 shadow-2xs">
+                            <span>🔩 Schrauben/Kleinkram</span>
+                            <span className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold">(Zählung in Paketen)</span>
+                          </span>
+                        )}
                         <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                           {m.varianten.length}{" "}
                           {m.varianten.length === 1 ? "Größe hinterlegt" : "Größen hinterlegt"}
@@ -228,7 +236,42 @@ export function MaterialienTable({
                   </div>
 
                   {/* Material Aktionen */}
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+                  <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                    {/* Tag Schnell-Umschalter */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const nextKat =
+                          m.kategorie === "SCHRAUBEN_KLEINKRAM" ? "STANDARD" : "SCHRAUBEN_KLEINKRAM";
+                        const res = await setMaterialKategorie(m.id, nextKat);
+                        if (res.success) {
+                          toast(
+                            `Material "${m.name}" auf Tag "${
+                              nextKat === "SCHRAUBEN_KLEINKRAM"
+                                ? "Schrauben/Kleinkram (Zählung in Paketen)"
+                                : "Standard (Zählung in Stück)"
+                            }" gesetzt.`
+                          );
+                          onChanged();
+                        } else {
+                          toast(res.error || "Fehler beim Setzen des Tags", "error");
+                        }
+                      }}
+                      className={`px-2 py-1 text-xs font-semibold rounded-lg border transition-colors cursor-pointer flex items-center gap-1 ${
+                        m.kategorie === "SCHRAUBEN_KLEINKRAM"
+                          ? "bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700"
+                          : "bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
+                      }`}
+                      title={
+                        m.kategorie === "SCHRAUBEN_KLEINKRAM"
+                          ? "Tag entfernen (zurück auf Standard Stück-Zählung)"
+                          : "Tag auf Schrauben/Kleinkram setzen (nur in Paketen zählen)"
+                      }
+                    >
+                      <Tag className="w-3 h-3" />
+                      <span>{m.kategorie === "SCHRAUBEN_KLEINKRAM" ? "🔩 Pakete-Zählung" : "+ Tag: Schrauben"}</span>
+                    </button>
+
                     <button
                       onClick={() => handleOpenAddVariante(m)}
                       className="px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
@@ -288,6 +331,8 @@ export function MaterialienTable({
                         <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                           {m.varianten.map((v) => {
                             const isCritical = v.istBestand < v.mindestbestand;
+                            const isSchrauben = m.kategorie === "SCHRAUBEN_KLEINKRAM";
+                            const unitText = isSchrauben ? "Pakete" : "Stk.";
 
                             return (
                               <tr
@@ -306,15 +351,15 @@ export function MaterialienTable({
                                   </span>
                                 </td>
                                 <td className="py-2.5 px-4 text-zinc-600 dark:text-zinc-300">
-                                  {v.mindestbestand.toLocaleString("de-DE")} Stk.
+                                  {v.mindestbestand.toLocaleString("de-DE")} {unitText}
                                 </td>
                                 <td className="py-2.5 px-4 font-semibold text-zinc-900 dark:text-zinc-100">
-                                  {v.istBestand.toLocaleString("de-DE")} Stk.
+                                  {v.istBestand.toLocaleString("de-DE")} {unitText}
                                 </td>
                                 <td className="py-2.5 px-4">
                                   {v.isBestellt ? (
                                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-                                      📦 Bestellt{v.bestelltMenge ? ` (${v.bestelltMenge} Stk.)` : ""}
+                                      📦 Bestellt{v.bestelltMenge ? ` (${v.bestelltMenge} ${unitText})` : ""}
                                     </span>
                                   ) : isCritical ? (
                                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">

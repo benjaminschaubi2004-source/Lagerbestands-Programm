@@ -145,6 +145,11 @@ export function TechnikerFinder({
       return availableVarianten.find((v) => v.id === selectedVarianteId) || availableVarianten[0] || null;
     }, [availableVarianten, selectedVarianteId]);
 
+    const isKleinkram =
+      currentMaterial?.kategorie === "SCHRAUBEN_KLEINKRAM" || currentMaterial?.einheit === "Pakete";
+    const unitText = isKleinkram ? "Pakete" : "Stk.";
+    const unitSingular = isKleinkram ? "Paket" : "Stk.";
+
     const handleBooking = async (typ: "ausgabe" | "einnahme") => {
       if (!currentVariante || menge <= 0) return;
         try {
@@ -152,8 +157,9 @@ export function TechnikerFinder({
           const res = await bookBestand(currentVariante.id, menge, typ);
           if (res.success) {
             const actionText = typ === "ausgabe" ? "Ausgabe verbucht" : "Eingang verbucht";
+            const bookingUnit = isKleinkram ? (menge === 1 ? "Paket" : "Pakete") : "Stk.";
             toast(
-              `${actionText}: ${menge} Stk. Neuer Lagerbestand: ${res.neuerBestand} Stk.`
+              `${actionText}: ${menge} ${bookingUnit}. Neuer Lagerbestand: ${res.neuerBestand} ${bookingUnit}`
             );
             setMenge(1);
             onDataChanged();
@@ -437,6 +443,12 @@ export function TechnikerFinder({
                               🏷️ {currentMaterial.hersteller}
                             </span>
                           )}
+                          {isKleinkram && (
+                            <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-300 dark:border-amber-700 flex items-center gap-1 shadow-2xs">
+                              <span>🔩 Schrauben/Kleinkram</span>
+                              <span className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold">(in Paketen)</span>
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
@@ -470,7 +482,7 @@ export function TechnikerFinder({
                         <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
                           <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 shrink-0" />
                           <span className="text-xs sm:text-base font-semibold sm:font-bold text-zinc-800 dark:text-zinc-200">
-                            {currentVariante.mindestbestand} Stk.
+                            {currentVariante.mindestbestand} {unitText}
                           </span>
                         </div>
                       </div>
@@ -487,23 +499,24 @@ export function TechnikerFinder({
                         <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
                           <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
                           <span className="text-xs sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
-                            {currentVariante.istBestand} Stk.
+                            {currentVariante.istBestand} {unitText}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Mengenauswahl */}
-                    <div className="space-y-2 pt-1">
+                    <div className="space-y-2 pt-1 w-full">
                       <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 block">
                         3. Menge wählen
                       </label>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full max-w-full">
                         <button
                           type="button"
                           onClick={() => setMenge((prev) => Math.max(1, prev - 1))}
-                          className="min-h-[50px] w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation"
+                          className="min-h-[48px] h-12 w-12 sm:w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation shrink-0"
+                          title="Menge verringern"
                         >
                           <Minus className="w-5 h-5" />
                         </button>
@@ -513,32 +526,33 @@ export function TechnikerFinder({
                           min="1"
                           value={menge}
                           onChange={(e) => setMenge(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="flex-1 min-h-[50px] text-center text-xl font-bold border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 touch-manipulation"
+                          className="flex-1 min-w-0 w-full min-h-[48px] h-12 text-center text-xl font-bold border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 touch-manipulation"
                         />
 
                         <button
                           type="button"
                           onClick={() => setMenge((prev) => prev + 1)}
-                          className="min-h-[50px] w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation"
+                          className="min-h-[48px] h-12 w-12 sm:w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation shrink-0"
+                          title="Menge erhöhen"
                         >
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
 
                       {/* Schnellauswahl Buttons */}
-                      <div className="flex gap-2 pt-1">
+                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-1 w-full">
                         {[1, 2, 5, 10].map((step) => (
                           <button
                             key={step}
                             type="button"
                             onClick={() => setMenge(step)}
-                            className={`flex-1 min-h-[42px] py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer touch-manipulation ${
+                            className={`min-h-[40px] py-1 px-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer touch-manipulation text-center ${
                               menge === step
                                 ? "bg-indigo-100 dark:bg-indigo-950 border-indigo-400 text-indigo-700 dark:text-indigo-300 font-extrabold ring-1 ring-indigo-400"
                                 : "bg-zinc-50 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 active:bg-zinc-200"
                             }`}
                           >
-                            {step} Stk.
+                            {step} {isKleinkram ? (step === 1 ? "Paket" : "Pakete") : "Stk."}
                           </button>
                         ))}
                       </div>
@@ -558,7 +572,9 @@ export function TechnikerFinder({
                           <span>Ausgabe</span>
                         </div>
                         <span className="text-xs sm:text-[11px] font-normal opacity-95">
-                          {currentVariante.istBestand <= 0 ? "Kein Bestand" : `${menge} Stk. entnehmen`}
+                          {currentVariante.istBestand <= 0
+                            ? "Kein Bestand"
+                            : `${menge} ${menge === 1 ? unitSingular : unitText} entnehmen`}
                         </span>
                       </button>
 
@@ -573,7 +589,9 @@ export function TechnikerFinder({
                           <ArrowUpCircle className="w-5 h-5" />
                           <span>Einnahme</span>
                         </div>
-                        <span className="text-xs sm:text-[11px] font-normal opacity-95">{menge} Stk. einlagern</span>
+                        <span className="text-xs sm:text-[11px] font-normal opacity-95">
+                          {menge} {menge === 1 ? unitSingular : unitText} einlagern
+                        </span>
                       </button>
                     </div>
             </div>

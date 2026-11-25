@@ -44,6 +44,8 @@ model Material {
   name         String             @unique
   hersteller   String?
   beschreibung String?
+  kategorie    String?            @default("STANDARD") // "STANDARD" | "SCHRAUBEN_KLEINKRAM"
+  einheit      String?            @default("Stk.")     // "Stk." | "Pakete"
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   varianten    MaterialVariante[]

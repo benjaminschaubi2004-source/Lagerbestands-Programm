@@ -52,6 +52,8 @@ interface FlatVarianteRow {
   materialName: string;
   hersteller: string | null;
   materialBeschreibung: string | null;
+  kategorie?: string | null;
+  einheit?: string | null;
   varianteId: number;
   varianteName: string;
   artikelnummer: string;
@@ -152,6 +154,8 @@ export function OfficeView({
           materialName: m.name,
           hersteller: m.hersteller,
           materialBeschreibung: m.beschreibung,
+          kategorie: m.kategorie,
+          einheit: m.einheit,
           varianteId: v.id,
           varianteName: v.groesse.name,
           artikelnummer: v.artikelnummer,
@@ -862,184 +866,200 @@ export function OfficeView({
                   </td>
                 </tr>
               ) : (
-                filteredAndSortedRows.map((row) => (
-                  <tr
-                    key={row.varianteId}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
-                  >
-                    {/* Material */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                          {row.materialName}
-                        </span>
-                        {row.hersteller && (
-                          <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                            <span>🏷️</span>
-                            <span>{row.hersteller}</span>
+                filteredAndSortedRows.map((row) => {
+                  const rowIsKleinkram =
+                    row.kategorie === "SCHRAUBEN_KLEINKRAM" || row.einheit === "Pakete";
+                  const rowUnit = rowIsKleinkram ? "Pakete" : "Stk.";
+
+                  return (
+                    <tr
+                      key={row.varianteId}
+                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
+                    >
+                      {/* Material */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                            {row.materialName}
                           </span>
-                        )}
-                      </div>
-                      {row.materialBeschreibung && (
-                        <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
-                          {row.materialBeschreibung}
-                        </div>
-                      )}
-                    </td>
-
-                    {/* Variante */}
-                    <td className="py-3.5 px-4 font-semibold text-zinc-800 dark:text-zinc-200">
-                      <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-                        {row.varianteName}
-                      </span>
-                    </td>
-
-                    {/* Artikelnummer mit Kopier-Button */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900">
-                          {row.artikelnummer}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(row.artikelnummer)}
-                          className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
-                          title="Artikelnummer kopieren"
-                        >
-                          {copiedArtNr === row.artikelnummer ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
+                          {row.hersteller && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                              <span>🏷️</span>
+                              <span>{row.hersteller}</span>
+                            </span>
                           )}
-                        </button>
-                      </div>
-                    </td>
-
-                    {/* Mindestbestand */}
-                    <td className="py-3.5 px-4 text-zinc-600 dark:text-zinc-300 font-medium">
-                      {row.mindestbestand.toLocaleString("de-DE")} Stk.
-                    </td>
-
-                    {/* Ist-Lagerbestand */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <span
-                          className={`text-base ${
-                            row.isOutOfStock
-                              ? "text-red-700 dark:text-red-400"
-                              : row.isCritical
-                              ? "text-amber-700 dark:text-amber-400"
-                              : "text-zinc-900 dark:text-zinc-100"
-                          }`}
-                        >
-                          {row.istBestand.toLocaleString("de-DE")} Stk.
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Status Badge mit Differenz */}
-                    <td className="py-3.5 px-4">
-                      {row.isBestellt ? (
-                        <div className="inline-flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 shadow-2xs">
-                            <PackageCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                            Bestellt
-                          </span>
-                          <span className="text-[11px] text-indigo-700 dark:text-indigo-400 font-semibold pl-1">
-                            {row.bestelltMenge ? `${row.bestelltMenge} Stk.` : "Bestellung aktiv"}
-                            {row.bestelltAm ? ` (am ${row.bestelltAm.toLocaleDateString("de-DE")})` : ""}
-                          </span>
-                          {row.bestelltNotiz && (
-                            <span className="text-[10px] text-zinc-500 italic pl-1 line-clamp-1 max-w-[200px]" title={row.bestelltNotiz}>
-                              &quot;{row.bestelltNotiz}&quot;
+                          {rowIsKleinkram && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-300 dark:border-amber-700 flex items-center gap-1 shadow-2xs">
+                              <span>🔩 Schrauben/Kleinkram</span>
+                              <span className="text-[9px] text-amber-700 dark:text-amber-300 font-semibold">(in Paketen)</span>
                             </span>
                           )}
                         </div>
-                      ) : row.isOutOfStock ? (
-                        <div className="inline-flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800">
-                            <AlertOctagon className="w-3.5 h-3.5 text-red-600" />
-                            Ausverkauft (0 Stk.)
-                          </span>
-                          <span className="text-[11px] text-red-600 dark:text-red-400 font-semibold pl-1">
-                            Bedarf: {row.mindestbestand} Stk.
-                          </span>
-                        </div>
-                      ) : row.isCritical ? (
-                        <div className="inline-flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                            Meldebestand erreicht
-                          </span>
-                          <span className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold pl-1">
-                            {row.diff < 0 ? `Fehlt: ${Math.abs(row.diff)} Stk.` : "Am Mindestbestand"}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          Ausreichend (+{row.diff})
-                        </span>
-                      )}
-                    </td>
+                        {row.materialBeschreibung && (
+                          <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
+                            {row.materialBeschreibung}
+                          </div>
+                        )}
+                      </td>
 
-                    {/* Aktion / Bestellen */}
-                    <td className="py-3.5 px-4 text-right">
-                      {row.isBestellt ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOrderModalTarget({
-                              id: row.varianteId,
-                              artikelnummer: row.artikelnummer,
-                              groesseName: row.varianteName,
-                              materialName: row.materialName,
-                              hersteller: row.hersteller,
-                              istBestand: row.istBestand,
-                              mindestbestand: row.mindestbestand,
-                              isBestellt: true,
-                              bestelltAm: row.bestelltAm,
-                              bestelltMenge: row.bestelltMenge,
-                              bestelltNotiz: row.bestelltNotiz,
-                            });
-                            setIsOrderModalOpen(true);
-                          }}
-                          className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                          title="Bestelldetails einsehen, bearbeiten oder Status aufheben"
-                        >
-                          <PackageCheck className="w-3.5 h-3.5" />
-                          <span>Verwalten</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOrderModalTarget({
-                              id: row.varianteId,
-                              artikelnummer: row.artikelnummer,
-                              groesseName: row.varianteName,
-                              materialName: row.materialName,
-                              hersteller: row.hersteller,
-                              istBestand: row.istBestand,
-                              mindestbestand: row.mindestbestand,
-                              isBestellt: false,
-                            });
-                            setIsOrderModalOpen(true);
-                          }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer ${
-                            row.isOutOfStock || row.isCritical
-                              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-xs hover:shadow-sm"
-                              : "text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
-                          }`}
-                          title="Material als bestellt markieren"
-                        >
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Bestellen</span>
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      {/* Variante */}
+                      <td className="py-3.5 px-4 font-semibold text-zinc-800 dark:text-zinc-200">
+                        <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                          {row.varianteName}
+                        </span>
+                      </td>
+
+                      {/* Artikelnummer mit Kopier-Button */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900">
+                            {row.artikelnummer}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(row.artikelnummer)}
+                            className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+                            title="Artikelnummer kopieren"
+                          >
+                            {copiedArtNr === row.artikelnummer ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* Mindestbestand */}
+                      <td className="py-3.5 px-4 text-zinc-600 dark:text-zinc-300 font-medium">
+                        {row.mindestbestand.toLocaleString("de-DE")} {rowUnit}
+                      </td>
+
+                      {/* Ist-Lagerbestand */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span
+                            className={`text-base ${
+                              row.isOutOfStock
+                                ? "text-red-700 dark:text-red-400"
+                                : row.isCritical
+                                ? "text-amber-700 dark:text-amber-400"
+                                : "text-zinc-900 dark:text-zinc-100"
+                            }`}
+                          >
+                            {row.istBestand.toLocaleString("de-DE")} {rowUnit}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Status Badge mit Differenz */}
+                      <td className="py-3.5 px-4">
+                        {row.isBestellt ? (
+                          <div className="inline-flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 shadow-2xs">
+                              <PackageCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                              Bestellt
+                            </span>
+                            <span className="text-[11px] text-indigo-700 dark:text-indigo-400 font-semibold pl-1">
+                              {row.bestelltMenge ? `${row.bestelltMenge} ${rowUnit}` : "Bestellung aktiv"}
+                              {row.bestelltAm ? ` (am ${row.bestelltAm.toLocaleDateString("de-DE")})` : ""}
+                            </span>
+                            {row.bestelltNotiz && (
+                              <span className="text-[10px] text-zinc-500 italic pl-1 line-clamp-1 max-w-[200px]" title={row.bestelltNotiz}>
+                                &quot;{row.bestelltNotiz}&quot;
+                              </span>
+                            )}
+                          </div>
+                        ) : row.isOutOfStock ? (
+                          <div className="inline-flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800">
+                              <AlertOctagon className="w-3.5 h-3.5 text-red-600" />
+                              Ausverkauft (0 {rowUnit})
+                            </span>
+                            <span className="text-[11px] text-red-600 dark:text-red-400 font-semibold pl-1">
+                              Bedarf: {row.mindestbestand} {rowUnit}
+                            </span>
+                          </div>
+                        ) : row.isCritical ? (
+                          <div className="inline-flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                              Meldebestand erreicht
+                            </span>
+                            <span className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold pl-1">
+                              {row.diff < 0 ? `Fehlt: ${Math.abs(row.diff)} ${rowUnit}` : "Am Mindestbestand"}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Ausreichend (+{row.diff})
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Aktion / Bestellen */}
+                      <td className="py-3.5 px-4 text-right">
+                        {row.isBestellt ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOrderModalTarget({
+                                id: row.varianteId,
+                                artikelnummer: row.artikelnummer,
+                                groesseName: row.varianteName,
+                                materialName: row.materialName,
+                                hersteller: row.hersteller,
+                                kategorie: row.kategorie,
+                                einheit: row.einheit,
+                                istBestand: row.istBestand,
+                                mindestbestand: row.mindestbestand,
+                                isBestellt: true,
+                                bestelltAm: row.bestelltAm,
+                                bestelltMenge: row.bestelltMenge,
+                                bestelltNotiz: row.bestelltNotiz,
+                              });
+                              setIsOrderModalOpen(true);
+                            }}
+                            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            title="Bestelldetails einsehen, bearbeiten oder Status aufheben"
+                          >
+                            <PackageCheck className="w-3.5 h-3.5" />
+                            <span>Verwalten</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOrderModalTarget({
+                                id: row.varianteId,
+                                artikelnummer: row.artikelnummer,
+                                groesseName: row.varianteName,
+                                materialName: row.materialName,
+                                hersteller: row.hersteller,
+                                kategorie: row.kategorie,
+                                einheit: row.einheit,
+                                istBestand: row.istBestand,
+                                mindestbestand: row.mindestbestand,
+                                isBestellt: false,
+                              });
+                              setIsOrderModalOpen(true);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer ${
+                              row.isOutOfStock || row.isCritical
+                                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-xs hover:shadow-sm"
+                                : "text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+                            }`}
+                            title="Material als bestellt markieren"
+                          >
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            <span>Bestellen</span>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

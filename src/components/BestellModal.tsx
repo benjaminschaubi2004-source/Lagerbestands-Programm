@@ -25,6 +25,8 @@ export interface ModalVarianteTarget {
   groesseName: string;
   materialName: string;
   hersteller?: string | null;
+  kategorie?: string | null;
+  einheit?: string | null;
   istBestand: number;
   mindestbestand: number;
   isBestellt: boolean;
@@ -54,6 +56,10 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
 
   const [bestellMenge, setBestellMenge] = useState<number | string>(1);
   const [bestelltNotiz, setBestelltNotiz] = useState<string>("");
+
+  const isKleinkram =
+    variante?.kategorie === "SCHRAUBEN_KLEINKRAM" || variante?.einheit === "Pakete";
+  const modalUnit = isKleinkram ? "Pakete" : "Stk.";
 
   useEffect(() => {
     if (variante) {
@@ -222,13 +228,13 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
                     variante.istBestand === 0 ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-zinc-100"
                   }`}
                 >
-                  {variante.istBestand} Stk.
+                  {variante.istBestand} {modalUnit}
                 </span>
               </div>
               <div>
                 <span className="text-zinc-400 block font-medium">Mindestbestand:</span>
                 <span className="font-bold text-zinc-700 dark:text-zinc-300">
-                  {variante.mindestbestand} Stk.
+                  {variante.mindestbestand} {modalUnit}
                 </span>
               </div>
             </div>
@@ -239,7 +245,7 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
                 <span>
                   Bereits bestellt am:{" "}
                   <strong>{new Date(variante.bestelltAm).toLocaleDateString("de-DE")}</strong>
-                  {variante.bestelltMenge ? ` (${variante.bestelltMenge} Stk.)` : ""}
+                  {variante.bestelltMenge ? ` (${variante.bestelltMenge} ${modalUnit})` : ""}
                 </span>
               </div>
             )}
@@ -257,7 +263,7 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Bestellmenge (Stück) *
+                Bestellmenge ({modalUnit}) *
               </label>
               <div className="relative">
                 <input
