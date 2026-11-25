@@ -43,23 +43,26 @@ export function AndroidAppView() {
             Installiere die Lagerliste als eigenständige App auf Android-Smartphones und -Tablets. Ideal für Monteure in der Werkstatt und unterwegs vor dem Lagerregal sowie fürs Office.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <a
               href="/downloads/Lagerliste.apk"
               download="Lagerliste.apk"
-              onClick={handleDownloadClick}
-              className="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
+              onClick={() => toast("Download gestartet: Lagerliste.apk (Vollversion)")}
+              className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer group"
             >
               <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-              <span>Lagerliste.apk herunterladen (v1.0 Native)</span>
+              <span>Lagerliste.apk (Vollversion / Admin)</span>
             </a>
 
-            <div className="text-xs text-zinc-400 flex items-center justify-center sm:justify-start gap-2 py-2 px-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
-              <HardDrive className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>
-                Desktop-Kopie: <code className="text-zinc-200 font-mono">C:\Users\benja\Desktop\Lagerliste.apk</code>
-              </span>
-            </div>
+            <a
+              href="/downloads/Lagerliste-Techniker.apk"
+              download="Lagerliste-Techniker.apk"
+              onClick={() => toast("Download gestartet: Lagerliste-Techniker.apk (Exklusiv Techniker)")}
+              className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer group"
+            >
+              <Wrench className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+              <span>Lagerliste-Techniker.apk (Nur Techniker)</span>
+            </a>
           </div>
         </div>
       </div>

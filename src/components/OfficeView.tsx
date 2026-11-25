@@ -7,6 +7,7 @@ import { AutoItem, getAutos } from "@/actions/autos";
 import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
 import { MassRechner } from "./MassRechner";
+import { MeldungForm } from "./MeldungForm";
 import {
   Search,
   Filter,
@@ -31,6 +32,7 @@ import {
   ShoppingBag,
   PackageCheck,
   Ruler,
+  MessageSquarePlus,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { BestellModal, ModalVarianteTarget } from "./BestellModal";
@@ -71,7 +73,7 @@ export function OfficeView({
 }: OfficeViewProps) {
   const { toast } = useToast();
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
-  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos" | "rechner">("tabelle");
+  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos" | "rechner" | "meldung">("tabelle");
   const [statistikData, setStatistikData] = useState<LagerStatistikData | null>(initialStatistik || null);
   const [autosData, setAutosData] = useState<AutoItem[]>(initialAutos || []);
   const [isPending, startTransition] = useTransition();
@@ -442,6 +444,19 @@ export function OfficeView({
             <Ruler className="w-4 h-4" />
             <span>📐 Maß-Rechner</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveOfficeTab("meldung")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeOfficeTab === "meldung"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            <MessageSquarePlus className="w-4 h-4" />
+            <span>💬 Meldung an Admin</span>
+          </button>
         </div>
 
         <button
@@ -456,7 +471,14 @@ export function OfficeView({
         </button>
       </div>
 
-      {activeOfficeTab === "rechner" ? (
+      {activeOfficeTab === "meldung" ? (
+        <MeldungForm
+          bereich="OFFICE"
+          currentUserName="Office-Mitarbeiter"
+          title="Meldung an den Administrator"
+          subtitle="Ideen, Systemverbesserungen, Materialprobleme oder Anmerkungen direkt an die Geschäftsleitung senden."
+        />
+      ) : activeOfficeTab === "rechner" ? (
         <MassRechner embeddedIn="OFFICE" />
       ) : activeOfficeTab === "autos" ? (
         <AutosView initialAutos={autosData} />

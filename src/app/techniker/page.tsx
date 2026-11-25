@@ -11,7 +11,11 @@ export const metadata = {
   description: "Mobile Materialauswahl, Einnahme und Ausgabe für Monteure",
 };
 
-export default async function TechnikerPage() {
+export default async function TechnikerPage(props: {
+  searchParams?: Promise<{ app?: string; lock?: string }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const isLocked = searchParams.app === "1" || searchParams.app === "techniker" || searchParams.lock === "1";
   const { currentUser } = await protectRoute(["TECHNIKER", "ADMIN"], "/techniker");
 
   const [materialien, groessen, buchungen, autos] = await Promise.all([
@@ -28,6 +32,7 @@ export default async function TechnikerPage() {
       initialBuchungen={buchungen}
       initialAutos={autos}
       currentUser={currentUser}
+      isLocked={isLocked}
     />
   );
 }

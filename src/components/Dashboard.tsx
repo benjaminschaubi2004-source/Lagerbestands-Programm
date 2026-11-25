@@ -7,6 +7,7 @@ import { UserInfo, getUsers } from "@/actions/users";
 import { ActivityLogItem, getActivityLogs } from "@/actions/logs";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
 import { AutoItem, getAutos } from "@/actions/autos";
+import { MeldungItem, getMeldungen } from "@/actions/meldungen";
 import type { SessionUser } from "@/actions/auth";
 import { TechnikerFinder } from "./TechnikerFinder";
 import { MaterialienTable } from "./MaterialienTable";
@@ -15,6 +16,7 @@ import { UserManager } from "./UserManager";
 import { ActivityLogView } from "./ActivityLogView";
 import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
+import { AdminMeldungenView } from "./AdminMeldungenView";
 import { UserHeaderBadge } from "./UserHeaderBadge";
 import { AndroidAppView } from "./AndroidAppView";
 import { ToastProvider } from "./Toast";
@@ -33,6 +35,7 @@ import {
   Download,
   BarChart3,
   Car,
+  MessageSquare,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -42,6 +45,7 @@ interface DashboardProps {
   initialLogs: ActivityLogItem[];
   initialStatistik?: LagerStatistikData | null;
   initialAutos?: AutoItem[];
+  initialMeldungen?: MeldungItem[];
   currentUser?: SessionUser | null;
   isAdmin?: boolean;
 }
@@ -53,11 +57,12 @@ export function Dashboard({
   initialLogs,
   initialStatistik,
   initialAutos,
+  initialMeldungen,
   currentUser,
   isAdmin = true,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "materialien" | "statistik" | "autos" | "groessen" | "users" | "logs" | "techniker" | "apk"
+    "materialien" | "statistik" | "autos" | "meldungen" | "groessen" | "users" | "logs" | "techniker" | "apk"
   >("materialien");
 
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
@@ -66,13 +71,14 @@ export function Dashboard({
   const [logs, setLogs] = useState<ActivityLogItem[]>(initialLogs);
   const [statistik, setStatistik] = useState<LagerStatistikData | null>(initialStatistik || null);
   const [autos, setAutos] = useState<AutoItem[]>(initialAutos || []);
+  const [meldungen, setMeldungen] = useState<MeldungItem[]>(initialMeldungen || []);
   const [buchungen, setBuchungen] = useState<BuchungInfo[]>([]);
   const [isPending, startTransition] = useTransition();
 
   const reloadData = () => {
     startTransition(async () => {
       try {
-        const [mats, grs, buchs, usrs, lgs, stat, freshAutos] = await Promise.all([
+        const [mats, grs, buchs, usrs, lgs, stat, freshAutos, freshMeldungen] = await Promise.all([
           getMaterialien(),
           getGroessen(),
           getBuchungen(30),
@@ -80,6 +86,7 @@ export function Dashboard({
           getActivityLogs({ limit: 150 }),
           getLagerStatistik(),
           getAutos(),
+          getMeldungen(),
         ]);
         setMaterialien(mats);
         setGroessen(grs);
@@ -88,6 +95,7 @@ export function Dashboard({
         setLogs(lgs);
         setStatistik(stat);
         setAutos(freshAutos);
+        setMeldungen(freshMeldungen);
       } catch (err) {
         console.error("Fehler beim Aktualisieren der Daten:", err);
       }
@@ -102,7 +110,10 @@ export function Dashboard({
     if (!initialAutos) {
       getAutos().then(setAutos).catch(() => {});
     }
-  }, [initialStatistik, initialAutos]);
+    if (!initialMeldungen) {
+      getMeldungen().then(setMeldungen).catch(() => {});
+    }
+  }, [initialStatistik, initialAutos, initialMeldungen]);
 
   const totalVarianten = materialien.reduce((acc, m) => acc + m.varianten.length, 0);
 
@@ -222,6 +233,28 @@ export function Dashboard({
                 )}
               </button>
 
+              {/* 4. Tab: Meldungen & Feedback (NEU) */}
+              <button
+                onClick={() => setActiveTab("meldungen")}
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
+                  activeTab === "meldungen"
+                    ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-500" />
+                <span>Meldungen</span>
+                {meldungen.filter((m) => m.status === "OFFEN").length > 0 ? (
+                  <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-600 text-white font-extrabold animate-pulse">
+                    {meldungen.filter((m) => m.status === "OFFEN").length}
+                  </span>
+                ) : meldungen.length > 0 ? (
+                  <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
+                    {meldungen.length}
+                  </span>
+                ) : null}
+              </button>
+
               {/* 4. Tab: Größen */}
               <button
                 onClick={() => setActiveTab("groessen")}
@@ -322,6 +355,8 @@ export function Dashboard({
             )
           ) : activeTab === "autos" ? (
             <AutosView initialAutos={autos} />
+          ) : activeTab === "meldungen" ? (
+            <AdminMeldungenView initialMeldungen={meldungen} onChanged={reloadData} />
           ) : activeTab === "groessen" ? (
             <GroessenManager initialGroessen={groessen} onChanged={reloadData} />
           ) : activeTab === "users" ? (

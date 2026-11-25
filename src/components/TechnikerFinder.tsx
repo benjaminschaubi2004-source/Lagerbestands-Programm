@@ -34,8 +34,10 @@ import { MaterialModal } from "./MaterialModal";
 import { ConfirmModal } from "./ConfirmModal";
 import { FahrzeugSchadenMelder } from "./FahrzeugSchadenMelder";
 import { MassRechner } from "./MassRechner";
+import { MeldungForm } from "./MeldungForm";
 import { clearAndBackupAllLogs } from "@/actions/logs";
 import { AutoItem } from "@/actions/autos";
+import { MessageSquarePlus } from "lucide-react";
 
 interface TechnikerFinderProps {
   materialien: MaterialWithVarianten[];
@@ -80,8 +82,8 @@ export function TechnikerFinder({
     }
   };
 
-  // Aktiver Tab auf Mobile: "buchen" | "schaden" | "rechner" | "journal"
-  const [activeMobileView, setActiveMobileView] = useState<"buchen" | "schaden" | "rechner" | "journal">("buchen");
+  // Aktiver Tab auf Mobile: "buchen" | "schaden" | "rechner" | "meldung" | "journal"
+  const [activeMobileView, setActiveMobileView] = useState<"buchen" | "schaden" | "rechner" | "meldung" | "journal">("buchen");
 
   const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(() => {
     return materialien.length > 0 ? materialien[0].id : null;
@@ -190,8 +192,8 @@ export function TechnikerFinder({
 
       return (
         <div className="w-full max-w-2xl mx-auto space-y-4 pb-16 touch-manipulation">
-          {/* Umschalter für Monteure: Material buchen vs. Auto-Schaden vs. Maß-Rechner vs. Journal */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-1.5 shadow-xs">
+          {/* Umschalter für Monteure: Material buchen vs. Auto-Schaden vs. Maß-Rechner vs. Meldung an Admin vs. Journal */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-1.5 shadow-xs">
             <button
               type="button"
               onClick={() => setActiveMobileView("buchen")}
@@ -233,8 +235,21 @@ export function TechnikerFinder({
 
             <button
               type="button"
-              onClick={() => setActiveMobileView("journal")}
+              onClick={() => setActiveMobileView("meldung")}
               className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeMobileView === "meldung"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
+              }`}
+            >
+              <MessageSquarePlus className="w-4 h-4 shrink-0 text-amber-500" />
+              <span className="truncate">Admin-Meldung</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMobileView("journal")}
+              className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation col-span-2 sm:col-span-1 ${
                 activeMobileView === "journal"
                   ? "bg-indigo-600 text-white shadow-sm"
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
@@ -598,7 +613,18 @@ export function TechnikerFinder({
             <MassRechner embeddedIn="MONTEUR" />
           )}
 
-          {/* VIEW 4: EINGÄNGE & AUSGÄNGE (BUCHUNGSHISTORIE) */}
+          {/* VIEW 4: MELDUNG AN DEN ADMIN */}
+          {activeMobileView === "meldung" && (
+            <MeldungForm
+              bereich="MONTEUR"
+              currentUserName={currentMonteurName}
+              onSuccess={onDataChanged}
+              title="Meldung an den Administrator"
+              subtitle="Ideen, Werkzeug-Wünsche, Baustellen-Probleme oder Feedback direkt an die Geschäftsleitung."
+            />
+          )}
+
+          {/* VIEW 5: EINGÄNGE & AUSGÄNGE (BUCHUNGSHISTORIE) */}
           {activeMobileView === "journal" && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">

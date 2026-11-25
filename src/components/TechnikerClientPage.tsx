@@ -22,6 +22,7 @@ interface TechnikerClientPageProps {
   initialBuchungen: BuchungInfo[];
   initialAutos?: AutoItem[];
   currentUser?: SessionUser | null;
+  isLocked?: boolean;
 }
 
 export function TechnikerClientPage({
@@ -30,6 +31,7 @@ export function TechnikerClientPage({
   initialBuchungen,
   initialAutos = [],
   currentUser,
+  isLocked = false,
 }: TechnikerClientPageProps) {
   const [materialien, setMaterialien] = useState(initialMaterialien);
   const [groessen, setGroessen] = useState(initialGroessen);
@@ -85,14 +87,16 @@ export function TechnikerClientPage({
 
               <UserHeaderBadge currentUser={currentUser} targetRoleHint="TECHNIKER" />
 
-              <Link
-                href="/"
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1"
-                title="Rolle wechseln"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Rolle</span>
-              </Link>
+              {!isLocked && (
+                <Link
+                  href="/"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1"
+                  title="Rolle wechseln"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Rolle</span>
+                </Link>
+              )}
             </div>
           </div>
         </header>
