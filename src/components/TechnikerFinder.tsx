@@ -12,7 +12,6 @@ import {
   Layers,
   CheckCircle2,
   AlertTriangle,
-  Copy,
   Check,
   Plus,
   Minus,
@@ -89,7 +88,6 @@ export function TechnikerFinder({
     return materialien.length > 0 ? materialien[0].id : null;
   });
   const [selectedVarianteId, setSelectedVarianteId] = useState<number | null>(null);
-  const [copied, setCopied] = useState(false);
   const [menge, setMenge] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
   const [isAddVarianteOpen, setIsAddVarianteOpen] = useState(false);
@@ -146,14 +144,6 @@ export function TechnikerFinder({
       if (!availableVarianten.length) return null;
       return availableVarianten.find((v) => v.id === selectedVarianteId) || availableVarianten[0] || null;
     }, [availableVarianten, selectedVarianteId]);
-
-    const handleCopyArtikelnummer = () => {
-      if (!currentVariante) return;
-      navigator.clipboard.writeText(currentVariante.artikelnummer);
-      setCopied(true);
-      toast(`Artikelnummer "${currentVariante.artikelnummer}" kopiert.`);
-      setTimeout(() => setCopied(false), 2000);
-    };
 
     const handleBooking = async (typ: "ausgabe" | "einnahme") => {
       if (!currentVariante || menge <= 0) return;
@@ -381,8 +371,8 @@ export function TechnikerFinder({
                     </div>
                   ) : (
                     <div className="space-y-3">
-                        {/* Große, responsive Touch-Kacheln für alle Varianten */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        {/* Große, responsive Touch-Kacheln für alle Varianten (auf Mobile kompakt) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
                           {availableVarianten.map((v) => {
                             const isSelected = currentVariante?.id === v.id;
                             const isCritical = v.istBestand <= v.mindestbestand;
@@ -392,25 +382,25 @@ export function TechnikerFinder({
                                 key={v.id}
                                 type="button"
                                 onClick={() => setSelectedVarianteId(v.id)}
-                                className={`min-h-[64px] p-3 rounded-xl border-2 text-left transition-colors cursor-pointer flex flex-col justify-between touch-manipulation ${
+                                className={`min-h-[46px] sm:min-h-[64px] p-2 sm:p-3 rounded-lg sm:rounded-xl border-2 text-left transition-colors cursor-pointer flex flex-col justify-between touch-manipulation ${
                                   isSelected
                                     ? "bg-indigo-600 text-white border-indigo-600 shadow-md font-bold ring-2 ring-indigo-400/40"
                                     : "bg-zinc-50 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700 hover:border-indigo-300 active:bg-zinc-200 dark:active:bg-zinc-700"
                                 }`}
                               >
                                 <div className="flex items-center justify-between gap-1">
-                                  <span className="text-sm font-bold truncate leading-tight">
+                                  <span className="text-xs sm:text-sm font-bold truncate leading-tight">
                                     {v.groesse.name}
                                   </span>
                                   {isSelected && (
-                                    <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                                      <Check className="w-3 h-3 text-white" />
+                                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                                      <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                                     </span>
                                   )}
                                 </div>
 
                                 <div
-                                  className={`text-xs mt-1.5 font-semibold flex items-center justify-between gap-1 ${
+                                  className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1.5 font-semibold flex items-center justify-between gap-1 ${
                                     isSelected
                                       ? "text-indigo-100"
                                       : isCritical
@@ -420,13 +410,13 @@ export function TechnikerFinder({
                                 >
                                   <span>Bestand: {v.istBestand}</span>
                                   {isCritical && !isSelected && (
-                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
                                   )}
                                 </div>
                               </button>
-                        );
-                  })}
-                      </div>
+                            );
+                          })}
+                        </div>
                     </div>
                   )}
                 </div>
@@ -452,14 +442,6 @@ export function TechnikerFinder({
                           <span className="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
                             {currentVariante.artikelnummer}
                           </span>
-                          <button
-                            type="button"
-                            onClick={handleCopyArtikelnummer}
-                            className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 active:bg-zinc-200 cursor-pointer touch-manipulation"
-                            title="Kopieren"
-                          >
-                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
                         </div>
                       </div>
 
@@ -479,32 +461,32 @@ export function TechnikerFinder({
                       </div>
                     </div>
 
-                    {/* Kennzahlen */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                    {/* Kennzahlen (auf Mobile kompakt) */}
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
                           Mindestbestand
                         </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Layers className="w-4 h-4 text-zinc-400" />
-                          <span className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                          <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 shrink-0" />
+                          <span className="text-xs sm:text-base font-semibold sm:font-bold text-zinc-800 dark:text-zinc-200">
                             {currentVariante.mindestbestand} Stk.
                           </span>
                         </div>
                       </div>
 
                       <div
-                        className={`p-3 rounded-xl border ${isBelowMin
+                        className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border ${isBelowMin
                             ? "bg-red-50/80 dark:bg-red-950/40 border-red-300 dark:border-red-800"
                             : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-800"
                           }`}
                       >
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
                           Ist-Lagerbestand
                         </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Package className="w-4 h-4 text-indigo-500" />
-                          <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                          <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
+                          <span className="text-xs sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
                             {currentVariante.istBestand} Stk.
                           </span>
                         </div>
@@ -559,41 +541,41 @@ export function TechnikerFinder({
                             {step} Stk.
                           </button>
                         ))}
-                </div>
-              </div>
+                      </div>
+                    </div>
 
-              {/* 4. Buchungs-Aktionen: Entnehmen (Ausgabe) oder Einlagern (Einnahme) */}
-              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-2 gap-3">
-                {/* AUSGABE */}
-                <button
-                  type="button"
-                  disabled={isBooking || currentVariante.istBestand <= 0}
-                  onClick={() => handleBooking("ausgabe")}
-                  className="min-h-[56px] px-3 rounded-xl font-bold text-sm text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
-                >
-                  <div className="flex items-center gap-1.5 font-extrabold">
-                    <ArrowDownCircle className="w-5 h-5" />
-                    <span>Ausgabe</span>
-                  </div>
-                  <span className="text-[11px] font-normal opacity-90">
-                    {currentVariante.istBestand <= 0 ? "Kein Bestand" : `${menge} Stk.entnehmen`}
-                  </span>
-                </button>
+                    {/* 4. Buchungs-Aktionen: Entnehmen (Ausgabe) oder Einlagern (Einnahme) - Auf Mobile größer & griffiger */}
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-2 gap-2.5 sm:gap-3">
+                      {/* AUSGABE */}
+                      <button
+                        type="button"
+                        disabled={isBooking || currentVariante.istBestand <= 0}
+                        onClick={() => handleBooking("ausgabe")}
+                        className="min-h-[66px] sm:min-h-[56px] py-2.5 sm:py-2 px-3 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
+                      >
+                        <div className="flex items-center gap-1.5 font-extrabold text-base sm:text-sm">
+                          <ArrowDownCircle className="w-5 h-5" />
+                          <span>Ausgabe</span>
+                        </div>
+                        <span className="text-xs sm:text-[11px] font-normal opacity-95">
+                          {currentVariante.istBestand <= 0 ? "Kein Bestand" : `${menge} Stk. entnehmen`}
+                        </span>
+                      </button>
 
-                {/* EINNAHME */}
-                <button
-                  type="button"
-                  disabled={isBooking}
-                  onClick={() => handleBooking("einnahme")}
-                  className="min-h-[56px] px-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 transition-colors shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
-                >
-                  <div className="flex items-center gap-1.5 font-extrabold">
-                    <ArrowUpCircle className="w-5 h-5" />
-                    <span>Einnahme</span>
-                  </div>
-                  <span className="text-[11px] font-normal opacity-90">{menge} Stk. einlagern</span>
-                </button>
-              </div>
+                      {/* EINNAHME */}
+                      <button
+                        type="button"
+                        disabled={isBooking}
+                        onClick={() => handleBooking("einnahme")}
+                        className="min-h-[66px] sm:min-h-[56px] py-2.5 sm:py-2 px-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.98] disabled:opacity-50 transition-all shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
+                      >
+                        <div className="flex items-center gap-1.5 font-extrabold text-base sm:text-sm">
+                          <ArrowUpCircle className="w-5 h-5" />
+                          <span>Einnahme</span>
+                        </div>
+                        <span className="text-xs sm:text-[11px] font-normal opacity-95">{menge} Stk. einlagern</span>
+                      </button>
+                    </div>
             </div>
           )}
         </div>
