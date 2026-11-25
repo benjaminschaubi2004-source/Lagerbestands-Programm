@@ -1,5 +1,6 @@
 import { getMaterialien, getBuchungen } from "@/actions/materialien";
 import { getGroessen } from "@/actions/groessen";
+import { getAutos } from "@/actions/autos";
 import { protectRoute } from "@/lib/auth";
 import { TechnikerClientPage } from "@/components/TechnikerClientPage";
 
@@ -13,10 +14,11 @@ export const metadata = {
 export default async function MonteurPage() {
   const { currentUser } = await protectRoute(["TECHNIKER", "MONTEUR", "ADMIN"], "/monteur");
 
-  const [materialien, groessen, buchungen] = await Promise.all([
+  const [materialien, groessen, buchungen, autos] = await Promise.all([
     getMaterialien(),
     getGroessen(),
     getBuchungen(30),
+    getAutos(),
   ]);
 
   return (
@@ -24,6 +26,7 @@ export default async function MonteurPage() {
       initialMaterialien={materialien}
       initialGroessen={groessen}
       initialBuchungen={buchungen}
+      initialAutos={autos}
       currentUser={currentUser}
     />
   );

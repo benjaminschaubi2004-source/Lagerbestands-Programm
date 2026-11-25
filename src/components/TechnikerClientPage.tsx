@@ -8,6 +8,7 @@ import {
   getBuchungen,
 } from "@/actions/materialien";
 import { GroesseWithCount, getGroessen } from "@/actions/groessen";
+import { AutoItem, getAutos } from "@/actions/autos";
 import type { SessionUser } from "@/actions/auth";
 import { TechnikerFinder } from "./TechnikerFinder";
 import { ToastProvider } from "./Toast";
@@ -19,6 +20,7 @@ interface TechnikerClientPageProps {
   initialMaterialien: MaterialWithVarianten[];
   initialGroessen: GroesseWithCount[];
   initialBuchungen: BuchungInfo[];
+  initialAutos?: AutoItem[];
   currentUser?: SessionUser | null;
 }
 
@@ -26,24 +28,28 @@ export function TechnikerClientPage({
   initialMaterialien,
   initialGroessen,
   initialBuchungen,
+  initialAutos = [],
   currentUser,
 }: TechnikerClientPageProps) {
   const [materialien, setMaterialien] = useState(initialMaterialien);
   const [groessen, setGroessen] = useState(initialGroessen);
   const [buchungen, setBuchungen] = useState<BuchungInfo[]>(initialBuchungen);
+  const [autos, setAutos] = useState<AutoItem[]>(initialAutos);
   const [isPending, startTransition] = useTransition();
 
   const reloadData = () => {
     startTransition(async () => {
       try {
-        const [mats, grs, buchs] = await Promise.all([
+        const [mats, grs, buchs, freshAutos] = await Promise.all([
           getMaterialien(),
           getGroessen(),
           getBuchungen(30),
+          getAutos(),
         ]);
         setMaterialien(mats);
         setGroessen(grs);
         setBuchungen(buchs);
+        setAutos(freshAutos);
       } catch (err) {
         console.error("Fehler beim Laden:", err);
       }
@@ -97,6 +103,8 @@ export function TechnikerClientPage({
             materialien={materialien}
             groessen={groessen}
             buchungen={buchungen}
+            autos={autos}
+            currentMonteurName={currentUser?.username}
             onDataChanged={reloadData}
             isStandaloneMobile={true}
           />

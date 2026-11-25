@@ -407,3 +407,109 @@ export async function seedSampleAutos(): Promise<{ success: boolean; count: numb
     return { success: false, count: 0, error: error.message };
   }
 }
+
+/**
+ * Schadensmeldung durch Monteur an ein Fahrzeug senden
+ */
+export interface ReportSchadenInput {
+  autoId: number;
+  schaden: string;
+  status?: string; // "DEFEKT" | "WERKSTATT" | "BEREIT"
+  kilometerstand?: number | null;
+  gemeldetVon?: string | null;
+}
+
+export async function reportFahrzeugSchaden(
+  input: ReportSchadenInput
+): Promise<{ success: boolean; error?: string; auto?: AutoItem }> {
+  const autoId = Number(input.autoId);
+  const schadenText = input.schaden?.trim();
+
+  if (!autoId || isNaN(autoId)) {
+    return { success: false, error: "Ungültige Fahrzeug-ID." };
+  }
+  if (!schadenText) {
+    return { success: false, error: "Bitte geben Sie eine Beschreibung des Schadens oder Mangels ein." };
+  }
+
+  try {
+    const existingAuto = await getAutoById(autoId);
+    if (!existingAuto) {
+      return { success: false, error: "Das ausgewählte Fahrzeug wurde nicht gefunden." };
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const reporterName = input.gemeldetVon?.trim() || "Monteur";
+    const newEntry = `[${dateStr} - Gemeldet von ${reporterName}]: ${schadenText}`;
+
+    const existingDefects = existingAuto.defekte?.trim();
+    const updatedDefects = existingDefects
+      ? `${existingDefects}\n• ${newEntry}`
+      : `• ${newEntry}`;
+
+    // Wenn kein expliziter Status gewählt wurde, setze auf DEFEKT
+    let newStatus = input.status?.trim() || "DEFEKT";
+    if (!input.status && existingAuto.status === "WERKSTATT") {
+      newStatus = "WERKSTATT";
+    }
+
+    const km =
+      input.kilometerstand !== undefined &&
+      input.kilometerstand !== null &&
+      !isNaN(Number(input.kilometerstand)) &&
+      Number(input.kilometerstand) > 0
+        ? Math.floor(Number(input.kilometerstand))
+        : existingAuto.kilometerstand;
+
+    let updated: AutoItem;
+
+    if ((db as any)?.auto?.update) {
+      updated = await db.auto.update({
+        where: { id: autoId },
+        data: {
+          defekte: updatedDefects,
+          status: newStatus,
+          kilometerstand: km,
+        },
+      });
+    } else {
+      const pool = getDbPool();
+      const res = await pool.query(
+        `UPDATE "Auto" 
+         SET "defekte" = $1, "status" = $2, "kilometerstand" = $3, "updatedAt" = NOW() 
+         WHERE id = $4 
+         RETURNING *;`,
+        [updatedDefects, newStatus, km, autoId]
+      );
+      updated = mapRowToAuto(res.rows[0]);
+    }
+
+    await logActivity({
+      bereich: "TECHNIKER",
+      aktion: "FAHRZEUG_SCHADEN_GEMELDET",
+      beschreibung: `Schaden an "${existingAuto.name}" gemeldet von ${reporterName}: ${schadenText}`,
+      details: `Status auf "${newStatus}" gesetzt.${km ? ` Kilometerstand: ${km} km.` : ""}`,
+      customUsername: reporterName,
+      customUserRole: "MONTEUR",
+    });
+
+    revalidatePath("/monteur");
+    revalidatePath("/techniker");
+    revalidatePath("/office");
+    revalidatePath("/admin");
+    revalidatePath("/");
+
+    return { success: true, auto: updated };
+  } catch (error: any) {
+    console.error("Fehler beim Melden des Fahrzeugschadens:", error);
+    return { success: false, error: error.message || "Fehler beim Speichern der Schadensmeldung." };
+  }
+}

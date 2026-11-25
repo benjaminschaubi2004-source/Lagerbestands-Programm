@@ -25,17 +25,24 @@ import {
   ArrowRight,
   X,
   Trash2,
+  Car,
+  Ruler,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { VarianteModal } from "./VarianteModal";
 import { MaterialModal } from "./MaterialModal";
 import { ConfirmModal } from "./ConfirmModal";
+import { FahrzeugSchadenMelder } from "./FahrzeugSchadenMelder";
+import { MassRechner } from "./MassRechner";
 import { clearAndBackupAllLogs } from "@/actions/logs";
+import { AutoItem } from "@/actions/autos";
 
 interface TechnikerFinderProps {
   materialien: MaterialWithVarianten[];
   groessen: GroesseWithCount[];
   buchungen?: BuchungInfo[];
+  autos?: AutoItem[];
+  currentMonteurName?: string;
   onDataChanged: () => void;
   isStandaloneMobile?: boolean;
   isAdmin?: boolean;
@@ -45,6 +52,8 @@ export function TechnikerFinder({
   materialien,
   groessen,
   buchungen = [],
+  autos = [],
+  currentMonteurName = "Monteur",
   onDataChanged,
   isStandaloneMobile = false,
   isAdmin = false,
@@ -71,8 +80,8 @@ export function TechnikerFinder({
     }
   };
 
-  // Aktiver Tab auf Mobile: "buchen" (Material buchen) oder "journal" (Eingänge & Ausgänge)
-  const [activeMobileView, setActiveMobileView] = useState<"buchen" | "journal">("buchen");
+  // Aktiver Tab auf Mobile: "buchen" | "schaden" | "rechner" | "journal"
+  const [activeMobileView, setActiveMobileView] = useState<"buchen" | "schaden" | "rechner" | "journal">("buchen");
 
   const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(() => {
     return materialien.length > 0 ? materialien[0].id : null;
@@ -181,35 +190,61 @@ export function TechnikerFinder({
 
       return (
         <div className="w-full max-w-2xl mx-auto space-y-4 pb-16 touch-manipulation">
-          {/* Umschalter für Mobile: Material buchen vs. Letzte Eingänge/Ausgänge */}
-          <div className="flex bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-1.5 shadow-xs">
+          {/* Umschalter für Monteure: Material buchen vs. Auto-Schaden vs. Maß-Rechner vs. Journal */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-1.5 shadow-xs">
             <button
               type="button"
               onClick={() => setActiveMobileView("buchen")}
-              className={`flex-1 min-h-[46px] py-2 px-3 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer touch-manipulation ${
+              className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
                 activeMobileView === "buchen"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 active:bg-zinc-100 dark:active:bg-zinc-800"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
               }`}
             >
-              <Package className="w-4 h-4" />
-              <span>Material buchen</span>
+              <Package className="w-4 h-4 shrink-0" />
+              <span className="truncate">Material</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMobileView("schaden")}
+              className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeMobileView === "schaden"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
+              }`}
+            >
+              <Car className="w-4 h-4 shrink-0" />
+              <span className="truncate">Auto-Schaden</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMobileView("rechner")}
+              className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeMobileView === "rechner"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
+              }`}
+            >
+              <Ruler className="w-4 h-4 shrink-0" />
+              <span className="truncate">Maß-Rechner</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveMobileView("journal")}
-              className={`flex-1 min-h-[46px] py-2 px-3 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer touch-manipulation ${
+              className={`min-h-[44px] py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
                 activeMobileView === "journal"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 active:bg-zinc-100 dark:active:bg-zinc-800"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 active:bg-zinc-100 dark:active:bg-zinc-800"
               }`}
             >
-              <History className="w-4 h-4" />
-              <span>Eingänge & Ausgänge</span>
+              <History className="w-4 h-4 shrink-0" />
+              <span className="truncate">Journal</span>
               {buchungen.length > 0 && (
                 <span
-                  className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
                     activeMobileView === "journal"
                       ? "bg-white/20 text-white"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
@@ -223,7 +258,7 @@ export function TechnikerFinder({
 
           {/* VIEW 1: MATERIAL BUCHEN */}
           {activeMobileView === "buchen" && (
-              <div className="space-y-4">
+            <div className="space-y-4">
                 {/* Schritt 1: Material auswählen */}
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs">
                   <div className="flex items-center justify-between mb-2.5">
@@ -549,8 +584,22 @@ export function TechnikerFinder({
         </div>
       )}
 
-      {/* VIEW 2: EINGÄNGE & AUSGÄNGE (BUCHUNGSHISTORIE) */}
-      {activeMobileView === "journal" && (
+          {/* VIEW 2: FAHRZEUG-SCHADEN MELDEN */}
+          {activeMobileView === "schaden" && (
+            <FahrzeugSchadenMelder
+              autos={autos}
+              currentMonteurName={currentMonteurName}
+              onSchadenGemeldet={onDataChanged}
+            />
+          )}
+
+          {/* VIEW 3: AUFMAß- / ABZUGSRECHNER */}
+          {activeMobileView === "rechner" && (
+            <MassRechner embeddedIn="MONTEUR" />
+          )}
+
+          {/* VIEW 4: EINGÄNGE & AUSGÄNGE (BUCHUNGSHISTORIE) */}
+          {activeMobileView === "journal" && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <div>

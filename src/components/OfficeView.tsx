@@ -6,6 +6,7 @@ import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
 import { AutoItem, getAutos } from "@/actions/autos";
 import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
+import { MassRechner } from "./MassRechner";
 import {
   Search,
   Filter,
@@ -29,6 +30,7 @@ import {
   Car,
   ShoppingBag,
   PackageCheck,
+  Ruler,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { BestellModal, ModalVarianteTarget } from "./BestellModal";
@@ -69,7 +71,7 @@ export function OfficeView({
 }: OfficeViewProps) {
   const { toast } = useToast();
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
-  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos">("tabelle");
+  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos" | "rechner">("tabelle");
   const [statistikData, setStatistikData] = useState<LagerStatistikData | null>(initialStatistik || null);
   const [autosData, setAutosData] = useState<AutoItem[]>(initialAutos || []);
   const [isPending, startTransition] = useTransition();
@@ -427,6 +429,19 @@ export function OfficeView({
               </span>
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveOfficeTab("rechner")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeOfficeTab === "rechner"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            <Ruler className="w-4 h-4" />
+            <span>📐 Maß-Rechner</span>
+          </button>
         </div>
 
         <button
@@ -441,7 +456,9 @@ export function OfficeView({
         </button>
       </div>
 
-      {activeOfficeTab === "autos" ? (
+      {activeOfficeTab === "rechner" ? (
+        <MassRechner embeddedIn="OFFICE" />
+      ) : activeOfficeTab === "autos" ? (
         <AutosView initialAutos={autosData} />
       ) : activeOfficeTab === "statistik" ? (
         statistikData ? (
