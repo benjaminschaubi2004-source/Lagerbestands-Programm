@@ -370,6 +370,8 @@ export function Dashboard({
               materialien={materialien}
               groessen={groessen}
               buchungen={buchungen}
+              autos={autos}
+              currentMonteurName={currentUser ? (currentUser.name || currentUser.username) : "Admin"}
               onDataChanged={reloadData}
               isAdmin={isAdmin}
             />

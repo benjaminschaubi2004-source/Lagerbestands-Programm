@@ -15,6 +15,7 @@ import {
   User,
   FileText,
   Search,
+  Lock,
 } from "lucide-react";
 import { useToast } from "./Toast";
 
@@ -39,7 +40,7 @@ export function FahrzeugSchadenMelder({
   const [schadenText, setSchadenText] = useState("");
   const [dringlichkeit, setDringlichkeit] = useState<"DEFEKT" | "WERKSTATT" | "BEREIT">("DEFEKT");
   const [kmStandInput, setKmStandInput] = useState<string>("");
-  const [monteurName, setMonteurName] = useState<string>(currentMonteurName || "Monteur");
+  const reporterName = currentMonteurName?.trim() || "Monteur";
   const [searchCar, setSearchCar] = useState("");
 
   const filteredAutos = useMemo(() => {
@@ -78,7 +79,7 @@ export function FahrzeugSchadenMelder({
           schaden: trimmedText,
           status: dringlichkeit,
           kilometerstand: km && !isNaN(km) ? km : undefined,
-          gemeldetVon: monteurName.trim() || "Monteur",
+          gemeldetVon: reporterName,
         });
 
         if (res.success) {
@@ -282,18 +283,29 @@ export function FahrzeugSchadenMelder({
                 />
               </div>
 
-              {/* Gemeldet von */}
+              {/* Gemeldet von (Automatisch ausgewählt & nicht änderbar) */}
               <div>
                 <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1 flex items-center gap-1">
                   <User className="w-3.5 h-3.5 text-zinc-400" />
                   Gemeldet von (Monteur)
                 </label>
-                <input
-                  type="text"
-                  value={monteurName}
-                  onChange={(e) => setMonteurName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-medium"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={reporterName}
+                    readOnly
+                    disabled
+                    tabIndex={-1}
+                    className="w-full pl-3.5 pr-24 py-2 text-sm border border-zinc-200 dark:border-zinc-700/80 rounded-xl bg-zinc-100 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 font-semibold cursor-not-allowed select-none"
+                  />
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 bg-zinc-200/80 dark:bg-zinc-700/80 px-2 py-0.5 rounded-md select-none">
+                    <Lock className="w-2.5 h-2.5 text-zinc-500" />
+                    <span>Automatisch</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-zinc-400 mt-0.5">
+                  Wird automatisch aus deinem angemeldeten Profil übernommen und kann nicht geändert werden.
+                </p>
               </div>
             </div>
 

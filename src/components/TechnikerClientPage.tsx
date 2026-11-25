@@ -108,7 +108,7 @@ export function TechnikerClientPage({
             groessen={groessen}
             buchungen={buchungen}
             autos={autos}
-            currentMonteurName={currentUser?.username}
+            currentMonteurName={currentUser ? (currentUser.name || currentUser.username) : "Monteur"}
             onDataChanged={reloadData}
             isStandaloneMobile={true}
           />

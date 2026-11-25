@@ -269,18 +269,25 @@ export function MeldungForm({
           />
         </div>
 
-        {/* 5. Absender Name */}
+        {/* 5. Absender Name (Automatisch aus Benutzerkonto) */}
         <div>
           <label className="block text-xs font-medium text-zinc-500 mb-1 flex items-center gap-1.5">
             <User className="w-3.5 h-3.5" />
-            <span>Dein Name / Absender</span>
+            <span>Absender (Angemeldeter Benutzer)</span>
           </label>
-          <input
-            type="text"
-            value={absenderInput}
-            onChange={(e) => setAbsenderInput(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-violet-500 font-medium"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={absenderInput}
+              readOnly
+              disabled
+              tabIndex={-1}
+              className="w-full pl-3.5 pr-24 py-2 text-sm border border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold cursor-not-allowed select-none"
+            />
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 bg-zinc-200 dark:bg-zinc-700 px-2 py-0.5 rounded-md select-none">
+              Automatisch
+            </span>
+          </div>
         </div>
 
         {/* Submit Button */}
