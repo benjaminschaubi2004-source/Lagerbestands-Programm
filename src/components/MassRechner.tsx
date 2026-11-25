@@ -35,26 +35,26 @@ const BERECHNUNGS_PROFILE: BerechnungsProfil[] = [
   {
     id: "rollladen_kasten",
     titel: "Rollladenbehang – Kastenzuschnitt",
-    untertitel: "Breite -75 mm | Höhe -10 mm",
+    untertitel: "Breite -75 mm | Höhe -100 mm (10 cm)",
     kategorie: "Rollladen",
     abzugBreite: 75,
-    abzugHoehe: 10,
+    abzugHoehe: 100,
     erklaerungBreite: "Kastenzuschnitt-Abzugsmaß: -75 mm",
-    erklaerungHoehe: "Höhen-Abzugsmaß: -10 mm",
+    erklaerungHoehe: "Höhen-Abzugsmaß: -100 mm (10 cm)",
     hinweis:
-      "Vom gemessenen Maß wird in der Breite 75 mm abgezogen (Kastenzuschnitt) und in der Höhe 10 mm.",
+      "Vom gemessenen Maß wird in der Breite 75 mm abgezogen (Kastenzuschnitt) und in der Höhe 100 mm (10 cm).",
   },
   {
     id: "rollladen_schiene",
     titel: "Rollladenbehang – Schienenzwischenmaß",
-    untertitel: "Breite -2 mm (Luft & Arretierung)",
+    untertitel: "Breite -20 mm (2 cm Luft & Arretierung)",
     kategorie: "Rollladen",
-    abzugBreite: 2,
+    abzugBreite: 20,
     abzugHoehe: 0,
-    erklaerungBreite: "Luft & Arretierung Abzug: -2 mm insgesamt",
+    erklaerungBreite: "Luft & Arretierung Abzug: -20 mm (2 cm) insgesamt",
     erklaerungHoehe: "Kein Höhenabzug (1:1 übernommen)",
     hinweis:
-      "Vom Schienenzwischenmaß wird für Luft und Arretierung insgesamt minus 2 mm abgezogen.",
+      "Vom Schienenzwischenmaß wird für Luft und Arretierung insgesamt minus 20 mm (2 cm) abgezogen.",
   },
 ];
 
