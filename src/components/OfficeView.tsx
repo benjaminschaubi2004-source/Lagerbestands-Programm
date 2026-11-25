@@ -37,9 +37,12 @@ import {
   Link2,
   Edit2,
   Globe,
+  Mail,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { BestellModal, ModalVarianteTarget } from "./BestellModal";
+import { BedarfsMailModal } from "./BedarfsMailModal";
+import { BedarfsMailItem } from "@/actions/mail";
 
 interface OfficeViewProps {
   materialien: MaterialWithVarianten[];
@@ -112,6 +115,9 @@ export function OfficeView({
   } | null>(null);
   const [urlInput, setUrlInput] = useState("");
   const [isSavingUrl, setIsSavingUrl] = useState(false);
+
+  // Bedarfsliste-Mail Modal Zustand
+  const [isBedarfsMailModalOpen, setIsBedarfsMailModalOpen] = useState(false);
 
   // Synchronisieren falls initialMaterialien sich ändern
   React.useEffect(() => {
@@ -213,6 +219,24 @@ export function OfficeView({
     () => allVariantenRows.filter((r) => !r.isCritical && !r.isOutOfStock && !r.isBestellt).length,
     [allVariantenRows]
   );
+
+  // Liste aller ausverkauften & kritischen Positionen für die Outlook-Sammelmail
+  const bedarfsItems = useMemo<BedarfsMailItem[]>(() => {
+    return allVariantenRows
+      .filter((r) => !r.isBestellt && (r.isOutOfStock || r.isCritical))
+      .map((r) => ({
+        materialName: r.materialName,
+        hersteller: r.hersteller,
+        groesseName: r.varianteName,
+        artikelnummer: r.artikelnummer,
+        istBestand: r.istBestand,
+        mindestbestand: r.mindestbestand,
+        fehlmenge: Math.max(1, r.mindestbestand - r.istBestand),
+        einheit: r.kategorie === "SCHRAUBEN_KLEINKRAM" || r.einheit === "Pakete" ? "Pakete" : "Stk.",
+        status: r.isOutOfStock ? ("OUT_OF_STOCK" as const) : ("CRITICAL" as const),
+        url: r.url,
+      }));
+  }, [allVariantenRows]);
 
   // Prüfen, ob irgendein Filter aktiv ist
   const isAnyFilterActive =
@@ -853,11 +877,27 @@ export function OfficeView({
             <button
               type="button"
               onClick={handleExportCSV}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200 dark:border-blue-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 transition-colors flex items-center gap-1.5 cursor-pointer"
               title="Aktuelle Ansicht als Excel-kompatible CSV exportieren"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>CSV Export</span>
+            </button>
+
+            {/* Bedarfsliste per Outlook-Sammelmail versenden */}
+            <button
+              type="button"
+              onClick={() => setIsBedarfsMailModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Bedarfsliste (Ausverkauft & Kritisch) gebündelt per Outlook-Sammelmail versenden"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Bedarfsliste mailen</span>
+              {bedarfsItems.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-white/25 text-[10px] font-extrabold">
+                  {bedarfsItems.length}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -1373,6 +1413,13 @@ export function OfficeView({
           </form>
         </div>
       )}
+
+      {/* Modal: Bedarfsliste / Sammelmail an Outlook (Version A + B) */}
+      <BedarfsMailModal
+        isOpen={isBedarfsMailModalOpen}
+        onClose={() => setIsBedarfsMailModalOpen(false)}
+        items={bedarfsItems}
+      />
     </div>
   );
 }

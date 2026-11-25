@@ -47,6 +47,7 @@ interface TechnikerFinderProps {
   onDataChanged: () => void;
   isStandaloneMobile?: boolean;
   isAdmin?: boolean;
+  onCustomBook?: (varianteId: number, menge: number, typ: "ausgabe" | "einnahme") => Promise<{ success: boolean; neuerBestand?: number; error?: string }>;
 }
 
 export function TechnikerFinder({
@@ -58,6 +59,7 @@ export function TechnikerFinder({
   onDataChanged,
   isStandaloneMobile = false,
   isAdmin = false,
+  onCustomBook,
 }: TechnikerFinderProps) {
   const { toast } = useToast();
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
@@ -154,7 +156,9 @@ export function TechnikerFinder({
       if (!currentVariante || menge <= 0) return;
         try {
           setIsBooking(true);
-          const res = await bookBestand(currentVariante.id, menge, typ);
+          const res = onCustomBook
+            ? await onCustomBook(currentVariante.id, menge, typ)
+            : await bookBestand(currentVariante.id, menge, typ);
           if (res.success) {
             const actionText = typ === "ausgabe" ? "Ausgabe verbucht" : "Eingang verbucht";
             const bookingUnit = isKleinkram ? (menge === 1 ? "Paket" : "Pakete") : "Stk.";

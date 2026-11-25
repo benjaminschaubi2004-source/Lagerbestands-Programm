@@ -12,6 +12,7 @@ import {
   HardDrive,
   Wifi,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "./Toast";
 
@@ -33,17 +34,18 @@ export function AndroidAppView() {
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-4">
             <Smartphone className="w-3.5 h-3.5" />
-            <span>Offizielle Android App (Release v1.0)</span>
+            <span>Offizielle Android Apps (Release v1.0)</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
             Lagerliste für Android
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6 max-w-2xl">
-            Installiere die Lagerliste als eigenständige App auf Android-Smartphones und -Tablets. Ideal für Monteure in der Werkstatt und unterwegs vor dem Lagerregal sowie fürs Office.
+            Installiere die Lagerliste als eigenständige App auf Android-Smartphones und -Tablets. Ideal für Monteure in der Werkstatt, vor dem Lagerregal, fürs Office oder als autarke Offline-Demo ohne Serververbindung.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+            {/* 1. Vollversion / Admin */}
             <a
               href="/downloads/Lagerliste.apk"
               download="Lagerliste.apk"
@@ -54,6 +56,7 @@ export function AndroidAppView() {
               <span>Lagerliste.apk (Vollversion / Admin)</span>
             </a>
 
+            {/* 2. Nur Techniker */}
             <a
               href="/downloads/Lagerliste-Techniker.apk"
               download="Lagerliste-Techniker.apk"
@@ -63,12 +66,23 @@ export function AndroidAppView() {
               <Wrench className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
               <span>Lagerliste-Techniker.apk (Nur Techniker)</span>
             </a>
+
+            {/* 3. NEU: Offline Demo-Version */}
+            <a
+              href="/downloads/Lagerliste-Demo.apk"
+              download="Lagerliste-Demo.apk"
+              onClick={() => toast("Download gestartet: Lagerliste-Demo.apk (Offline Demo)")}
+              className="px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer group border border-amber-400/30"
+            >
+              <Sparkles className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform text-amber-200" />
+              <span>Lagerliste-Demo.apk (Offline Demo)</span>
+            </a>
           </div>
         </div>
       </div>
 
-      {/* 2. Rollen-Unterstützung */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* 2. Rollen-Unterstützung (4 Kacheln inkl. Demo) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Techniker */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
@@ -125,6 +139,26 @@ export function AndroidAppView() {
             <span>Vollständige CRUD & Logs</span>
           </div>
         </div>
+
+        {/* NEU: Offline Demo */}
+        <div className="bg-white dark:bg-zinc-900 border border-amber-300/40 dark:border-amber-700/40 rounded-2xl p-5 shadow-xs flex flex-col justify-between bg-gradient-to-b from-amber-500/5 to-transparent">
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center mb-3 shadow-md shadow-amber-600/20">
+              <Sparkles className="w-5 h-5 text-amber-100" />
+            </div>
+            <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+              <span>Offline Demo-Version</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30">100% Offline</span>
+            </h3>
+            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+              Vollfunktionsfähige Simulation aller 19 Materialien, 38 Varianten und Fuhrpark. Funktioniert ohne WLAN oder Server – ideal für Vorführungen mit 1-Klick Reset.
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Autarke Simulation & Reset</span>
+          </div>
+        </div>
       </div>
 
       {/* 3. Installations-Anleitung & Netzwerk-Info */}
@@ -147,9 +181,9 @@ export function AndroidAppView() {
               </span>
               <div>
                 <strong className="text-zinc-900 dark:text-zinc-200 block mb-0.5">
-                  APK-Datei auf das Smartphone laden
+                  Gewünschte APK auf das Smartphone laden
                 </strong>
-                Tippe oben auf <strong>„Lagerliste.apk herunterladen“</strong> direkt über den Browser deines Smartphones oder übertrage die Datei vom Desktop (<code className="font-mono text-zinc-500">C:\Users\benja\Desktop\Lagerliste.apk</code>) per USB-Kabel oder Messenger.
+                Tippe oben auf <strong>„Lagerliste.apk“</strong> (Vollversion im WLAN) oder <strong>„Lagerliste-Demo.apk“</strong> (100% autarke Offline-Demo ohne WLAN) direkt über den Browser deines Smartphones.
               </div>
             </li>
 
@@ -161,7 +195,7 @@ export function AndroidAppView() {
                 <strong className="text-zinc-900 dark:text-zinc-200 block mb-0.5">
                   Unbekannte Quellen / Sideloading erlauben
                 </strong>
-                Öffne die heruntergeladene <code className="font-mono text-zinc-500">Lagerliste.apk</code> auf dem Smartphone. Bestätige den Android-Sicherheitshinweis mit <em>„Aus dieser Quelle installieren erlauben“</em>.
+                Öffne die heruntergeladene APK-Datei auf dem Smartphone. Bestätige den Android-Sicherheitshinweis mit <em>„Aus dieser Quelle installieren erlauben“</em>.
               </div>
             </li>
 
@@ -171,9 +205,9 @@ export function AndroidAppView() {
               </span>
               <div>
                 <strong className="text-zinc-900 dark:text-zinc-200 block mb-0.5">
-                  App starten & Anmelden
+                  App starten
                 </strong>
-                Die App öffnet sich und verbindet sich direkt mit der Lagerliste im WLAN. Melde dich einfach mit deinen Benutzerdaten (z. B. <code className="font-mono text-zinc-500">techniker</code> / <code className="font-mono text-zinc-500">techniker123</code>) an!
+                Die App öffnet sich sofort im Vollbildmodus. Bei der Demo kannst du direkt loslegen; die Live-App verbindet sich automatisch mit dem Server im WLAN.
               </div>
             </li>
           </ol>
@@ -191,7 +225,7 @@ export function AndroidAppView() {
               </h3>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed mb-4">
-              Die Android-App ist ab Werk vorkonfiguriert, um sich im lokalen WLAN automatisch mit folgendem Server zu verbinden:
+              Die Live-App verbindet sich im WLAN mit:
             </p>
 
             <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono text-xs text-indigo-600 dark:text-indigo-400 font-bold break-all">
@@ -199,19 +233,31 @@ export function AndroidAppView() {
             </div>
 
             <p className="text-[11px] text-zinc-400 mt-2">
-              Sollte sich die IP-Adresse des Servers im Router einmal ändern, bietet die App direkt auf dem Startbildschirm eine Option zur Eingabe der neuen IP-Adresse.
+              💡 Die <strong>Lagerliste-Demo.apk</strong> benötigt keine Serververbindung und läuft vollständig autark auf dem Smartphone.
             </p>
           </div>
 
-          <a
-            href="/downloads/Lagerliste.apk"
-            download="Lagerliste.apk"
-            onClick={handleDownloadClick}
-            className="w-full py-2.5 px-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>APK erneut herunterladen</span>
-          </a>
+          <div className="space-y-2">
+            <a
+              href="/downloads/Lagerliste-Demo.apk"
+              download="Lagerliste-Demo.apk"
+              onClick={() => toast("Download gestartet: Lagerliste-Demo.apk")}
+              className="w-full py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Demo-APK herunterladen (Offline)</span>
+            </a>
+
+            <a
+              href="/downloads/Lagerliste.apk"
+              download="Lagerliste.apk"
+              onClick={handleDownloadClick}
+              className="w-full py-2.5 px-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Live-APK herunterladen (WLAN)</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
