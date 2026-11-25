@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { MaterialVarianteInfo, addVariante, updateVariante } from "@/actions/materialien";
 import { GroesseWithCount } from "@/actions/groessen";
-import { X, Layers, Hash, Package, PlusCircle, Check } from "lucide-react";
+import { X, Layers, Hash, Package, PlusCircle, Check, Link2 } from "lucide-react";
 import { useToast } from "./Toast";
 
 interface VarianteModalProps {
@@ -38,6 +38,7 @@ export function VarianteModal({
   const [artikelnummer, setArtikelnummer] = useState("");
   const [mindestbestand, setMindestbestand] = useState(10);
   const [istBestand, setIstBestand] = useState(10);
+  const [url, setUrl] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export function VarianteModal({
       setArtikelnummer(varianteToEdit.artikelnummer);
       setMindestbestand(varianteToEdit.mindestbestand);
       setIstBestand(varianteToEdit.istBestand);
+      setUrl(varianteToEdit.url || "");
     } else {
       // Beim Neuanlegen
       if (selectableGroessen.length > 0) {
@@ -75,6 +77,7 @@ export function VarianteModal({
       setArtikelnummer("");
       setMindestbestand(10);
       setIstBestand(10);
+      setUrl("");
     }
     setErrorMessage(null);
   }, [isOpen, varianteToEdit, materialId, existingGroessenIds]);
@@ -144,6 +147,7 @@ export function VarianteModal({
         artikelnummer: artNr,
         mindestbestand,
         istBestand,
+        url: url.trim() || null,
       });
     } else {
       res = await addVariante(materialId, {
@@ -152,6 +156,7 @@ export function VarianteModal({
         artikelnummer: artNr,
         mindestbestand,
         istBestand,
+        url: url.trim() || null,
       });
     }
     setIsSubmitting(false);
@@ -325,6 +330,21 @@ export function VarianteModal({
                 className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+          </div>
+
+          {/* Shop- / Produkt-URL */}
+          <div>
+            <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 mb-1">
+              <Link2 className="w-3.5 h-3.5 text-zinc-400" />
+              Lieferanten-Shop / Produkt-URL (optional)
+            </label>
+            <input
+              type="text"
+              placeholder="z.B. https://shop.somfy.de/... oder www.beispiel.de/..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           {/* Footer */}

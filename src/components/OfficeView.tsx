@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useTransition } from "react";
-import { MaterialWithVarianten, getMaterialien } from "@/actions/materialien";
+import { MaterialWithVarianten, getMaterialien, updateVarianteUrl } from "@/actions/materialien";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
 import { AutoItem, getAutos } from "@/actions/autos";
 import { StatistikView } from "./StatistikView";
@@ -33,6 +33,10 @@ import {
   PackageCheck,
   Ruler,
   MessageSquarePlus,
+  ExternalLink,
+  Link2,
+  Edit2,
+  Globe,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { BestellModal, ModalVarianteTarget } from "./BestellModal";
@@ -64,6 +68,7 @@ interface FlatVarianteRow {
   bestelltAm: Date | null;
   bestelltMenge: number | null;
   bestelltNotiz: string | null;
+  url?: string | null;
   isCritical: boolean; // istBestand <= mindestbestand && !isBestellt
   isOutOfStock: boolean; // istBestand === 0 && !isBestellt
 }
@@ -96,6 +101,17 @@ export function OfficeView({
   // Bestell-Modal Zustand
   const [orderModalTarget, setOrderModalTarget] = useState<ModalVarianteTarget | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+
+  // URL-Modal Zustand (Shop-Link für Variante)
+  const [urlModalTarget, setUrlModalTarget] = useState<{
+    varianteId: number;
+    materialName: string;
+    varianteName: string;
+    artikelnummer: string;
+    currentUrl: string;
+  } | null>(null);
+  const [urlInput, setUrlInput] = useState("");
+  const [isSavingUrl, setIsSavingUrl] = useState(false);
 
   // Synchronisieren falls initialMaterialien sich ändern
   React.useEffect(() => {
@@ -166,6 +182,7 @@ export function OfficeView({
           bestelltAm: v.bestelltAm ? new Date(v.bestelltAm) : null,
           bestelltMenge: v.bestelltMenge ?? null,
           bestelltNotiz: v.bestelltNotiz ?? null,
+          url: v.url ?? null,
           isCritical,
           isOutOfStock,
         });
@@ -316,6 +333,79 @@ export function OfficeView({
     setTimeout(() => setCopiedArtNr(null), 2000);
   };
 
+  // URL-Modal Handler
+  const handleOpenUrlModal = (row: FlatVarianteRow) => {
+    setUrlModalTarget({
+      varianteId: row.varianteId,
+      materialName: row.materialName,
+      varianteName: row.varianteName,
+      artikelnummer: row.artikelnummer,
+      currentUrl: row.url || "",
+    });
+    setUrlInput(row.url || "");
+  };
+
+  const handleSaveUrl = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!urlModalTarget) return;
+
+    setIsSavingUrl(true);
+    try {
+      const res = await updateVarianteUrl(urlModalTarget.varianteId, urlInput.trim() || null);
+      if (res.success) {
+        setMaterialien((prev) =>
+          prev.map((m) => ({
+            ...m,
+            varianten: m.varianten.map((v) =>
+              v.id === urlModalTarget.varianteId ? { ...v, url: res.url ?? null } : v
+            ),
+          }))
+        );
+        toast(
+          res.url
+            ? `Shop-URL für "${urlModalTarget.materialName} (${urlModalTarget.varianteName})" hinterlegt.`
+            : `Shop-URL für "${urlModalTarget.materialName} (${urlModalTarget.varianteName})" entfernt.`
+        );
+        setUrlModalTarget(null);
+      } else {
+        toast(res.error || "Fehler beim Speichern der URL.", "error");
+      }
+    } catch {
+      toast("Netzwerkfehler beim Speichern der URL.", "error");
+    } finally {
+      setIsSavingUrl(false);
+    }
+  };
+
+  const handleRemoveUrl = async () => {
+    if (!urlModalTarget) return;
+    setIsSavingUrl(true);
+    try {
+      const res = await updateVarianteUrl(urlModalTarget.varianteId, null);
+      if (res.success) {
+        setMaterialien((prev) =>
+          prev.map((m) => ({
+            ...m,
+            varianten: m.varianten.map((v) =>
+              v.id === urlModalTarget.varianteId ? { ...v, url: null } : v
+            ),
+          }))
+        );
+        toast(`Shop-URL für "${urlModalTarget.materialName} (${urlModalTarget.varianteName})" entfernt.`);
+        setUrlModalTarget(null);
+      } else {
+        toast(res.error || "Fehler beim Entfernen der URL.", "error");
+      }
+    } catch {
+      toast("Netzwerkfehler beim Entfernen der URL.", "error");
+    } finally {
+      setIsSavingUrl(false);
+    }
+  };
+
   // CSV Export der aktuell gefilterten Liste
   const handleExportCSV = () => {
     if (filteredAndSortedRows.length === 0) {
@@ -331,6 +421,7 @@ export function OfficeView({
       "Ist-Lagerbestand",
       "Differenz",
       "Status",
+      "Shop-URL",
     ];
 
     const escapeCsv = (val: string | number) => `"${String(val).replace(/"/g, '""')}"`;
@@ -354,6 +445,7 @@ export function OfficeView({
               ? "Nachbestellen (Meldebestand unterschritten)"
               : "Ausreichend"
           ),
+          escapeCsv(r.url || ""),
         ].join(";")
       ),
     ];
@@ -843,6 +935,9 @@ export function OfficeView({
                   </div>
                 </th>
 
+                {/* Spalte Shop / Link */}
+                <th className="py-3 px-4 w-40 text-center">Shop / Link</th>
+
                 {/* Spalte Aktion */}
                 <th className="py-3 px-4 w-36 text-right">Aktion</th>
               </tr>
@@ -851,7 +946,7 @@ export function OfficeView({
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {filteredAndSortedRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-14 text-center text-zinc-500">
+                  <td colSpan={8} className="py-14 text-center text-zinc-500">
                     <Filter className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
                     <p className="font-semibold text-zinc-800 dark:text-zinc-200">
                       Keine Positionen für diese Filterkriterien gefunden.
@@ -998,6 +1093,42 @@ export function OfficeView({
                         )}
                       </td>
 
+                      {/* Shop / Link */}
+                      <td className="py-3.5 px-4 text-center">
+                        {row.url ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <a
+                              href={row.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors shadow-2xs max-w-[130px]"
+                              title={`Shop-Link öffnen: ${row.url}`}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">Shop-Link</span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenUrlModal(row)}
+                              className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                              title="URL bearbeiten"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenUrlModal(row)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 bg-zinc-50 dark:bg-zinc-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-800 transition-all cursor-pointer"
+                            title="Weblink oder Lieferanten-URL hinterlegen"
+                          >
+                            <Link2 className="w-3 h-3" />
+                            <span>+ URL</span>
+                          </button>
+                        )}
+                      </td>
+
                       {/* Aktion / Bestellen */}
                       <td className="py-3.5 px-4 text-right">
                         {row.isBestellt ? (
@@ -1018,6 +1149,7 @@ export function OfficeView({
                                 bestelltAm: row.bestelltAm,
                                 bestelltMenge: row.bestelltMenge,
                                 bestelltNotiz: row.bestelltNotiz,
+                                url: row.url,
                               });
                               setIsOrderModalOpen(true);
                             }}
@@ -1042,6 +1174,7 @@ export function OfficeView({
                                 istBestand: row.istBestand,
                                 mindestbestand: row.mindestbestand,
                                 isBestellt: false,
+                                url: row.url,
                               });
                               setIsOrderModalOpen(true);
                             }}
@@ -1119,6 +1252,127 @@ export function OfficeView({
           handleReload();
         }}
       />
+
+      {/* Modal zum Hinterlegen / Bearbeiten der Shop-URL */}
+      {urlModalTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => !isSavingUrl && setUrlModalTarget(null)}
+        >
+          <form
+            onSubmit={handleSaveUrl}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col"
+          >
+            <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800/30">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+                  <Link2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                    Shop- / Produkt-URL
+                  </h3>
+                  <p className="text-xs text-zinc-500 font-medium">
+                    Link für diese Artikelgröße hinterlegen
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => !isSavingUrl && setUrlModalTarget(null)}
+                className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Info Box */}
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    {urlModalTarget.materialName}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-zinc-200/80 dark:bg-zinc-700 font-bold text-zinc-800 dark:text-zinc-200">
+                    {urlModalTarget.varianteName}
+                  </span>
+                </div>
+                <div className="text-zinc-500 font-mono text-[11px]">
+                  Art.-Nr: {urlModalTarget.artikelnummer}
+                </div>
+              </div>
+
+              {/* Input */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Webadresse / Lieferanten-Link (URL)
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="z.B. https://shop.somfy.de/... oder www.beispiel.de/..."
+                  className="w-full px-3.5 py-2.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-medium"
+                />
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Kann direkt aus der Adresszeile des Browsers kopiert werden.
+                </p>
+              </div>
+
+              {/* Test link preview if valid */}
+              {urlInput.trim() && (
+                <div className="pt-1 flex items-center justify-between text-xs">
+                  <span className="text-zinc-400">Vorschau:</span>
+                  <a
+                    href={urlInput.trim().startsWith("http") ? urlInput.trim() : `https://${urlInput.trim()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Link im Browser öffnen</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between gap-2">
+              {urlModalTarget.currentUrl ? (
+                <button
+                  type="button"
+                  onClick={handleRemoveUrl}
+                  disabled={isSavingUrl}
+                  className="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 hover:bg-red-100 border border-red-200 dark:border-red-900/60 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Link entfernen
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setUrlModalTarget(null)}
+                  disabled={isSavingUrl}
+                  className="px-3.5 py-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingUrl}
+                  className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-98 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingUrl ? "Wird gespeichert..." : "Speichern"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ export interface MaterialVarianteInfo {
   bestelltAm?: Date | null;
   bestelltMenge?: number | null;
   bestelltNotiz?: string | null;
+  url?: string | null;
   materialId: number;
   groesseId: number;
   groesse: {
@@ -41,16 +42,18 @@ export interface CreateVarianteInput {
   artikelnummer: string;
   mindestbestand: number;
   istBestand?: number;
+  url?: string | null;
 }
 
 /**
- * Stellt sicher, dass die Spalten "kategorie" und "einheit" in PostgreSQL existieren
+ * Stellt sicher, dass die Spalten "kategorie", "einheit" und "url" in PostgreSQL existieren
  */
 export async function ensureMaterialColumns(): Promise<void> {
   const pool = getDbPool();
   await pool.query(`
     ALTER TABLE "Material" ADD COLUMN IF NOT EXISTS "kategorie" TEXT DEFAULT 'STANDARD';
     ALTER TABLE "Material" ADD COLUMN IF NOT EXISTS "einheit" TEXT DEFAULT 'Stk.';
+    ALTER TABLE "MaterialVariante" ADD COLUMN IF NOT EXISTS "url" TEXT;
   `);
 }
 
@@ -140,6 +143,7 @@ export async function createMaterial(data: CreateMaterialInput): Promise<{
       artikelnummer: string;
       mindestbestand: number;
       istBestand: number;
+      url?: string | null;
     }> = [];
 
     if (data.varianten && data.varianten.length > 0) {
@@ -171,6 +175,7 @@ export async function createMaterial(data: CreateMaterialInput): Promise<{
             artikelnummer: artNr,
             mindestbestand: Math.max(0, Number(v.mindestbestand) || 0),
             istBestand: Math.max(0, Number(v.istBestand) || 0),
+            url: v.url?.trim() || null,
           });
         }
       }
@@ -418,6 +423,7 @@ export async function addVariante(
         artikelnummer,
         mindestbestand,
         istBestand,
+        url: data.url?.trim() || null,
       },
       include: {
         material: true,
@@ -429,7 +435,7 @@ export async function addVariante(
       bereich: "ADMIN",
       aktion: "VARIANTE_CREATE",
       beschreibung: `Größen-Variante "${artikelnummer}" (${createdVar.groesse.name}) für Material "${createdVar.material.name}" angelegt.`,
-      details: `Mindestbestand: ${mindestbestand} Stk. | Ist-Bestand: ${istBestand} Stk.`,
+      details: `Mindestbestand: ${mindestbestand} Stk. | Ist-Bestand: ${istBestand} Stk.${data.url ? ` | URL hinterlegt` : ""}`,
     });
 
     revalidatePath("/");
@@ -450,11 +456,13 @@ export async function updateVariante(
     artikelnummer: string;
     mindestbestand: number;
     istBestand?: number;
+    url?: string | null;
   }
 ): Promise<{ success: boolean; error?: string }> {
   const artikelnummer = data.artikelnummer?.trim();
   const mindestbestand = Math.max(0, Number(data.mindestbestand) || 0);
   const istBestand = data.istBestand !== undefined ? Math.max(0, Number(data.istBestand) || 0) : undefined;
+  const url = data.url !== undefined ? (data.url?.trim() || null) : undefined;
 
   if (!artikelnummer) {
     return { success: false, error: "Artikelnummer darf nicht leer sein." };
@@ -477,6 +485,7 @@ export async function updateVariante(
         artikelnummer,
         mindestbestand,
         ...(istBestand !== undefined ? { istBestand } : {}),
+        ...(url !== undefined ? { url } : {}),
       },
       include: {
         material: true,
@@ -500,6 +509,79 @@ export async function updateVariante(
   } catch (error) {
     console.error("Fehler beim Aktualisieren der Variante:", error);
     return { success: false, error: "Variante konnte nicht aktualisiert werden." };
+  }
+}
+
+/**
+ * URL (Shop-Link / Lieferantenlink) für eine bestimmte Größen-Variante hinterlegen oder entfernen
+ */
+export async function updateVarianteUrl(
+  varianteId: number,
+  url: string | null
+): Promise<{ success: boolean; error?: string; url?: string | null }> {
+  try {
+    await ensureMaterialColumns();
+    const id = Number(varianteId);
+    if (!id || isNaN(id)) {
+      return { success: false, error: "Ungültige Varianten-ID." };
+    }
+
+    let cleanedUrl = url && url.trim() !== "" ? url.trim() : null;
+    if (cleanedUrl && !/^https?:\/\//i.test(cleanedUrl)) {
+      cleanedUrl = "https://" + cleanedUrl;
+    }
+
+    let updatedVar: any = null;
+    try {
+      updatedVar = await db.materialVariante.update({
+        where: { id },
+        data: { url: cleanedUrl },
+        include: {
+          material: true,
+          groesse: true,
+        },
+      });
+    } catch {
+      const pool = getDbPool();
+      const res = await pool.query(
+        `UPDATE "MaterialVariante" SET "url" = $1, "updatedAt" = NOW() WHERE id = $2 RETURNING *`,
+        [cleanedUrl, id]
+      );
+      if (res.rows.length === 0) {
+        return { success: false, error: "Variante nicht gefunden." };
+      }
+      const mRes = await pool.query(
+        `SELECT m.name as "materialName", g.name as "groesseName" 
+         FROM "MaterialVariante" mv 
+         LEFT JOIN "Material" m ON m.id = mv."materialId" 
+         LEFT JOIN "Groesse" g ON g.id = mv."groesseId" 
+         WHERE mv.id = $1`,
+        [id]
+      );
+      const mRow = mRes.rows[0];
+      updatedVar = {
+        ...res.rows[0],
+        material: { name: mRow?.materialName || `Material #${res.rows[0].materialId}` },
+        groesse: { name: mRow?.groesseName || "" },
+      };
+    }
+
+    await logActivity({
+      bereich: "OFFICE",
+      aktion: "VARIANTE_URL_UPDATE",
+      beschreibung: cleanedUrl
+        ? `Shop-URL für "${updatedVar.material.name} (${updatedVar.groesse.name})" hinterlegt.`
+        : `Shop-URL für "${updatedVar.material.name} (${updatedVar.groesse.name})" entfernt.`,
+      details: cleanedUrl ? `Link: ${cleanedUrl}` : undefined,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/office");
+    revalidatePath("/admin");
+    return { success: true, url: cleanedUrl };
+  } catch (err: any) {
+    console.error("Fehler beim Aktualisieren der URL:", err);
+    return { success: false, error: err.message || "Fehler beim Aktualisieren der URL." };
   }
 }
 

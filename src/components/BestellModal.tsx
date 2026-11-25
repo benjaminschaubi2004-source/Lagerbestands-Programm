@@ -15,6 +15,7 @@ import {
   Clock,
   CheckCircle2,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { orderMaterialVariante, cancelOrderMaterialVariante } from "@/actions/materialien";
@@ -33,6 +34,7 @@ export interface ModalVarianteTarget {
   bestelltAm?: Date | null;
   bestelltMenge?: number | null;
   bestelltNotiz?: string | null;
+  url?: string | null;
 }
 
 export interface OrderSuccessPayload {
@@ -247,6 +249,21 @@ export function BestellModal({ isOpen, onClose, variante, onSuccess }: BestellMo
                   <strong>{new Date(variante.bestelltAm).toLocaleDateString("de-DE")}</strong>
                   {variante.bestelltMenge ? ` (${variante.bestelltMenge} ${modalUnit})` : ""}
                 </span>
+              </div>
+            )}
+
+            {variante.url && (
+              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-zinc-500 dark:text-zinc-400 font-medium">Lieferanten-Shop / Produktlink:</span>
+                <a
+                  href={variante.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors shadow-2xs"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Zum Lieferanten-Shop öffnen</span>
+                </a>
               </div>
             )}
           </div>

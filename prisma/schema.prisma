@@ -56,6 +56,7 @@ model MaterialVariante {
   artikelnummer  String    @unique
   mindestbestand Int       @default(0)
   istBestand     Int       @default(0)
+  url            String?   // Bestell-Link / Lieferanten-URL pro Artikel & Größe
   isBestellt     Boolean   @default(false)
   bestelltAm     DateTime?
   bestelltMenge  Int?
