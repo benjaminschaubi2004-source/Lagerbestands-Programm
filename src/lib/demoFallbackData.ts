@@ -11,17 +11,17 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": "Standart Motore",
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 1,
         "artikelnummer": "T5-10NM",
         "mindestbestand": 5,
         "istBestand": 4,
-        "isBestellt": false,
-        "bestelltAm": null,
-        "bestelltMenge": 0,
+        "isBestellt": true,
+        "bestelltAm": "2026-11-28T10:02:20.023Z",
+        "bestelltMenge": 10,
         "bestelltNotiz": null,
         "materialId": 1,
         "groesseId": 1,
@@ -29,8 +29,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 1,
           "name": "10Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.472Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.637Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 2,
@@ -47,8 +47,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 2,
           "name": "20Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 3,
@@ -65,8 +65,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 3,
           "name": "30Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 4,
@@ -83,8 +83,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 4,
           "name": "50Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
@@ -95,8 +95,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": "Elektronische Endlagen Einstellung",
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 5,
@@ -113,8 +113,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 1,
           "name": "10Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 6,
@@ -131,8 +131,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 2,
           "name": "20Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 7,
@@ -149,8 +149,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 5,
           "name": "35Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
@@ -161,8 +161,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": "Funkmotore per EBHZ 868,95 MHZ",
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 8,
@@ -179,8 +179,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 1,
           "name": "10Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 9,
@@ -197,8 +197,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 2,
           "name": "20Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 10,
@@ -215,20 +215,20 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 5,
           "name": "35Nm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
   {
     "id": 4,
-    "name": "Wandsender",
+    "name": "Wandsender EBHZ",
     "hersteller": "Simu",
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 11,
@@ -245,8 +245,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 6,
           "name": "Ebhz"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       },
       {
         "id": 12,
@@ -263,8 +263,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 7,
           "name": "Ehz"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
@@ -275,8 +275,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 13,
@@ -293,8 +293,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 6,
           "name": "Ebhz"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
@@ -305,8 +305,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.640Z",
+    "updatedAt": "2026-11-28T11:12:29.640Z",
     "varianten": [
       {
         "id": 14,
@@ -323,8 +323,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 6,
           "name": "Ebhz"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.640Z",
+        "updatedAt": "2026-11-28T11:12:29.640Z"
       }
     ]
   },
@@ -335,8 +335,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 15,
@@ -353,8 +353,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 8,
           "name": "ehz"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -365,8 +365,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 16,
@@ -383,8 +383,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 9,
           "name": "Vestamatic"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -395,8 +395,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 17,
@@ -413,8 +413,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 10,
           "name": "1m"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 18,
@@ -431,8 +431,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 11,
           "name": "2m"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 19,
@@ -449,8 +449,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 12,
           "name": "3m"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 20,
@@ -467,8 +467,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 13,
           "name": "5m"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 21,
@@ -485,8 +485,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 14,
           "name": "8m"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -497,8 +497,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 22,
@@ -515,8 +515,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 15,
           "name": "4er"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 23,
@@ -533,8 +533,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 16,
           "name": "3er"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 24,
@@ -551,8 +551,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 17,
           "name": "2er"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -563,8 +563,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 25,
@@ -581,8 +581,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 18,
           "name": "0,75qmm²"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -593,8 +593,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 26,
@@ -611,8 +611,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 19,
           "name": "1,5-6qmm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -623,12 +623,12 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 27,
-        "artikelnummer": "HAFT-CLIPSE-NAGELSCHELLEN",
+        "artikelnummer": "NAGELSCHELLEN",
         "mindestbestand": 5,
         "istBestand": 9,
         "isBestellt": false,
@@ -641,8 +641,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 20,
           "name": "7-12mm"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -653,8 +653,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.473Z",
-    "updatedAt": "2026-11-25T22:41:31.473Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 28,
@@ -671,8 +671,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 21,
           "name": "Standard"
         },
-        "createdAt": "2026-11-25T22:41:31.473Z",
-        "updatedAt": "2026-11-25T22:41:31.473Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -683,8 +683,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 29,
@@ -701,8 +701,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 22,
           "name": "89x43x37mm grau"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 30,
@@ -719,8 +719,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 23,
           "name": "85x85x37mm grau"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 31,
@@ -737,17 +737,17 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 24,
           "name": "85x85x37mm Schwarz"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 32,
         "artikelnummer": "ABZWEIGDOSE-85X85X37MM",
         "mindestbestand": 5,
         "istBestand": 7,
-        "isBestellt": true,
-        "bestelltAm": "2026-11-22T19:43:39.605Z",
-        "bestelltMenge": 100,
+        "isBestellt": false,
+        "bestelltAm": null,
+        "bestelltMenge": 0,
         "bestelltNotiz": null,
         "materialId": 15,
         "groesseId": 25,
@@ -755,8 +755,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 25,
           "name": "85x85x37mm"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -767,8 +767,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 33,
@@ -785,8 +785,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 26,
           "name": "Unterputz"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 35,
@@ -803,8 +803,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 28,
           "name": "Aufputz klein"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -815,8 +815,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 34,
@@ -833,8 +833,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 27,
           "name": "6229-2R-UW"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       },
       {
         "id": 36,
@@ -851,8 +851,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 29,
           "name": "Für Aussen"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -863,8 +863,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 37,
@@ -881,8 +881,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 29,
           "name": "Für Aussen"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   },
@@ -893,8 +893,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
     "beschreibung": null,
     "kategorie": null,
     "einheit": "Stück",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "varianten": [
       {
         "id": 38,
@@ -911,8 +911,8 @@ export const DEMO_FALLBACK_MATERIALIEN: MaterialWithVarianten[] = [
           "id": 29,
           "name": "Für Aussen"
         },
-        "createdAt": "2026-11-25T22:41:31.474Z",
-        "updatedAt": "2026-11-25T22:41:31.474Z"
+        "createdAt": "2026-11-28T11:12:29.641Z",
+        "updatedAt": "2026-11-28T11:12:29.641Z"
       }
     ]
   }
@@ -922,8 +922,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 1,
     "name": "10Nm",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 3
     }
@@ -931,8 +931,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 2,
     "name": "20Nm",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 3
     }
@@ -940,8 +940,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 3,
     "name": "30Nm",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 1
     }
@@ -949,8 +949,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 4,
     "name": "50Nm",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 1
     }
@@ -958,8 +958,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 5,
     "name": "35Nm",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 2
     }
@@ -967,8 +967,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 6,
     "name": "Ebhz",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 3
     }
@@ -976,8 +976,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 7,
     "name": "Ehz",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 1
     }
@@ -985,8 +985,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 8,
     "name": "ehz",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 1
     }
@@ -994,8 +994,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 9,
     "name": "Vestamatic",
-    "createdAt": "2026-11-25T22:41:31.474Z",
-    "updatedAt": "2026-11-25T22:41:31.474Z",
+    "createdAt": "2026-11-28T11:12:29.641Z",
+    "updatedAt": "2026-11-28T11:12:29.641Z",
     "_count": {
       "varianten": 1
     }
@@ -1003,8 +1003,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 10,
     "name": "1m",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1012,8 +1012,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 11,
     "name": "2m",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1021,8 +1021,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 12,
     "name": "3m",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1030,8 +1030,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 13,
     "name": "5m",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1039,8 +1039,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 14,
     "name": "8m",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1048,8 +1048,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 15,
     "name": "4er",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1057,8 +1057,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 16,
     "name": "3er",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1066,8 +1066,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 17,
     "name": "2er",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1075,8 +1075,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 18,
     "name": "0,75qmm²",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1084,8 +1084,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 19,
     "name": "1,5-6qmm",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1093,8 +1093,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 20,
     "name": "7-12mm",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1102,8 +1102,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 21,
     "name": "Standard",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1111,8 +1111,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 22,
     "name": "89x43x37mm grau",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1120,8 +1120,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 23,
     "name": "85x85x37mm grau",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1129,8 +1129,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 24,
     "name": "85x85x37mm Schwarz",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1138,8 +1138,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 25,
     "name": "85x85x37mm",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1147,8 +1147,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 26,
     "name": "Unterputz",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1156,8 +1156,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 27,
     "name": "6229-2R-UW",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1165,8 +1165,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 28,
     "name": "Aufputz klein",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 1
     }
@@ -1174,8 +1174,8 @@ export const DEMO_FALLBACK_GROESSEN: GroesseWithCount[] = [
   {
     "id": 29,
     "name": "Für Aussen",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z",
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z",
     "_count": {
       "varianten": 3
     }
@@ -1191,10 +1191,10 @@ export const DEMO_FALLBACK_AUTOS: AutoItem[] = [
     "defekte": null,
     "tuevTermin": null,
     "anmerkungen": "Fahrer J.W",
-    "kilometerstand": null,
+    "kilometerstand": 10000,
     "status": "BEREIT",
     "createdAt": "2026-11-22T18:11:58.390Z",
-    "updatedAt": "2026-11-22T18:36:10.182Z"
+    "updatedAt": "2026-11-25T21:15:46.433Z"
   },
   {
     "id": 2,
@@ -1206,7 +1206,7 @@ export const DEMO_FALLBACK_AUTOS: AutoItem[] = [
     "anmerkungen": "Werkstattwagen Monteur Team Nord",
     "kilometerstand": 84500,
     "status": "BEREIT",
-    "createdAt": "2026-11-25T22:41:31.475Z",
-    "updatedAt": "2026-11-25T22:41:31.475Z"
+    "createdAt": "2026-11-28T11:12:29.642Z",
+    "updatedAt": "2026-11-28T11:12:29.642Z"
   }
 ] as any;

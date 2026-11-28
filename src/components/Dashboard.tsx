@@ -8,6 +8,7 @@ import { ActivityLogItem, getActivityLogs } from "@/actions/logs";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
 import { AutoItem, getAutos } from "@/actions/autos";
 import { MeldungItem, getMeldungen } from "@/actions/meldungen";
+import { WebLinkItem, getWebLinks } from "@/actions/links";
 import type { SessionUser } from "@/actions/auth";
 import { TechnikerFinder } from "./TechnikerFinder";
 import { MaterialienTable } from "./MaterialienTable";
@@ -17,6 +18,7 @@ import { ActivityLogView } from "./ActivityLogView";
 import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
 import { AdminMeldungenView } from "./AdminMeldungenView";
+import { WebLinksView } from "./WebLinksView";
 import { UserHeaderBadge } from "./UserHeaderBadge";
 import { AndroidAppView } from "./AndroidAppView";
 import { ToastProvider } from "./Toast";
@@ -37,6 +39,7 @@ import {
   BarChart3,
   Car,
   MessageSquare,
+  Globe,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -47,6 +50,7 @@ interface DashboardProps {
   initialStatistik?: LagerStatistikData | null;
   initialAutos?: AutoItem[];
   initialMeldungen?: MeldungItem[];
+  initialLinks?: WebLinkItem[];
   currentUser?: SessionUser | null;
   isAdmin?: boolean;
 }
@@ -59,11 +63,12 @@ export function Dashboard({
   initialStatistik,
   initialAutos,
   initialMeldungen,
+  initialLinks,
   currentUser,
   isAdmin = true,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "materialien" | "statistik" | "autos" | "meldungen" | "groessen" | "users" | "logs" | "techniker" | "apk"
+    "materialien" | "statistik" | "autos" | "meldungen" | "links" | "groessen" | "users" | "logs" | "techniker" | "apk"
   >("materialien");
 
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
@@ -73,13 +78,14 @@ export function Dashboard({
   const [statistik, setStatistik] = useState<LagerStatistikData | null>(initialStatistik || null);
   const [autos, setAutos] = useState<AutoItem[]>(initialAutos || []);
   const [meldungen, setMeldungen] = useState<MeldungItem[]>(initialMeldungen || []);
+  const [links, setLinks] = useState<WebLinkItem[]>(initialLinks || []);
   const [buchungen, setBuchungen] = useState<BuchungInfo[]>([]);
   const [isPending, startTransition] = useTransition();
 
   const reloadData = () => {
     startTransition(async () => {
       try {
-        const [mats, grs, buchs, usrs, lgs, stat, freshAutos, freshMeldungen] = await Promise.all([
+        const [mats, grs, buchs, usrs, lgs, stat, freshAutos, freshMeldungen, freshLinks] = await Promise.all([
           getMaterialien(),
           getGroessen(),
           getBuchungen(30),
@@ -88,6 +94,7 @@ export function Dashboard({
           getLagerStatistik(),
           getAutos(),
           getMeldungen(),
+          getWebLinks(),
         ]);
         setMaterialien(mats);
         setGroessen(grs);
@@ -97,6 +104,7 @@ export function Dashboard({
         setStatistik(stat);
         setAutos(freshAutos);
         setMeldungen(freshMeldungen);
+        setLinks(freshLinks);
       } catch (err) {
         console.error("Fehler beim Aktualisieren der Daten:", err);
       }
@@ -114,7 +122,10 @@ export function Dashboard({
     if (!initialMeldungen) {
       getMeldungen().then(setMeldungen).catch(() => {});
     }
-  }, [initialStatistik, initialAutos, initialMeldungen]);
+    if (!initialLinks) {
+      getWebLinks().then(setLinks).catch(() => {});
+    }
+  }, [initialStatistik, initialAutos, initialMeldungen, initialLinks]);
 
   const totalVarianten = materialien.reduce((acc, m) => acc + m.varianten.length, 0);
 
@@ -268,6 +279,24 @@ export function Dashboard({
                 ) : null}
               </button>
 
+              {/* Tab: Webseiten / Linksammlung */}
+              <button
+                onClick={() => setActiveTab("links")}
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
+                  activeTab === "links"
+                    ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500" />
+                <span>Webseiten</span>
+                {links.length > 0 && (
+                  <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-semibold">
+                    {links.length}
+                  </span>
+                )}
+              </button>
+
               {/* 4. Tab: Größen */}
               <button
                 onClick={() => setActiveTab("groessen")}
@@ -370,6 +399,8 @@ export function Dashboard({
             <AutosView initialAutos={autos} />
           ) : activeTab === "meldungen" ? (
             <AdminMeldungenView initialMeldungen={meldungen} onChanged={reloadData} />
+          ) : activeTab === "links" ? (
+            <WebLinksView initialLinks={links} onLinksChanged={reloadData} />
           ) : activeTab === "groessen" ? (
             <GroessenManager initialGroessen={groessen} onChanged={reloadData} />
           ) : activeTab === "users" ? (

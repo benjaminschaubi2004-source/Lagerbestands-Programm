@@ -34,14 +34,15 @@ export function getDbPool(): Pool {
   return pool;
 }
 
-const DB_SCHEMA_VERSION = "2026-11-22-v4";
+const DB_SCHEMA_VERSION = "2026-11-28-v6";
 
 export function getPrismaClient(): PrismaClient {
   // Verwirft veraltete gecachte Instanzen bei Schema-Änderungen
   if (
     globalForPrisma.prisma &&
     (globalForPrisma as any)._schemaVersion === DB_SCHEMA_VERSION &&
-    (globalForPrisma.prisma as any).auto
+    (globalForPrisma.prisma as any).auto &&
+    (globalForPrisma.prisma as any).webLink
   ) {
     return globalForPrisma.prisma;
   }

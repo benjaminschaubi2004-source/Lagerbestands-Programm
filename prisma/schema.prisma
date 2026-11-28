@@ -110,3 +110,15 @@ model Meldung {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model WebLink {
+  id           Int      @id @default(autoincrement())
+  titel        String   // Bezeichnung der Webseite (z.B. "Lieferant Würth", "Hornbach")
+  url          String   // Ziel-URL (z.B. "https://www.wuerth.de")
+  beschreibung String?  // Optionale Beschreibung, Kundennr. oder Notiz
+  kategorie    String?  @default("Allgemein") // z.B. "Lieferanten", "Hersteller", "Behörden", "Tools"
+  icon         String?  // Optionales Icon
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+

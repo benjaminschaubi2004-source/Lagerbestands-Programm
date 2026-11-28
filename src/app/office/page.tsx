@@ -1,6 +1,7 @@
 import { getMaterialien } from "@/actions/materialien";
 import { getLagerStatistik } from "@/actions/statistik";
 import { getAutos } from "@/actions/autos";
+import { getWebLinks } from "@/actions/links";
 import { protectRoute } from "@/lib/auth";
 import { OfficeView } from "@/components/OfficeView";
 import { ToastProvider } from "@/components/Toast";
@@ -12,16 +13,17 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Office-Übersicht – Lagerliste",
-  description: "Readonly-Bestandsübersicht, Statistiken und Fuhrpark/Autos",
+  description: "Readonly-Bestandsübersicht, Statistiken, Fuhrpark und wichtige Webseiten",
 };
 
 export default async function OfficePage() {
   const { currentUser } = await protectRoute(["OFFICE", "ADMIN"], "/office");
 
-  const [materialien, statistik, autos] = await Promise.all([
+  const [materialien, statistik, autos, links] = await Promise.all([
     getMaterialien(),
     getLagerStatistik(),
     getAutos(),
+    getWebLinks(),
   ]);
 
   return (
@@ -41,7 +43,7 @@ export default async function OfficePage() {
                     Office
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500 hidden md:block truncate">Material- und Variantenübersicht, Statistiken & Fuhrpark</p>
+                <p className="text-xs text-zinc-500 hidden md:block truncate">Material- und Variantenübersicht, Statistiken, Fuhrpark & Portale</p>
               </div>
             </div>
 
@@ -66,6 +68,7 @@ export default async function OfficePage() {
             materialien={materialien}
             initialStatistik={statistik}
             initialAutos={autos}
+            initialLinks={links}
           />
         </main>
       </div>

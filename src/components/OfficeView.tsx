@@ -4,10 +4,12 @@ import React, { useState, useMemo, useTransition } from "react";
 import { MaterialWithVarianten, getMaterialien, updateVarianteUrl } from "@/actions/materialien";
 import { LagerStatistikData, getLagerStatistik } from "@/actions/statistik";
 import { AutoItem, getAutos } from "@/actions/autos";
+import { WebLinkItem, getWebLinks } from "@/actions/links";
 import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
 import { MassRechner } from "./MassRechner";
 import { MeldungForm } from "./MeldungForm";
+import { WebLinksView } from "./WebLinksView";
 import {
   Search,
   Filter,
@@ -48,6 +50,7 @@ interface OfficeViewProps {
   materialien: MaterialWithVarianten[];
   initialStatistik?: LagerStatistikData | null;
   initialAutos?: AutoItem[];
+  initialLinks?: WebLinkItem[];
 }
 
 type StatusFilterType = "ALL" | "CRITICAL" | "OUT_OF_STOCK" | "ORDERED" | "OK";
@@ -80,12 +83,14 @@ export function OfficeView({
   materialien: initialMaterialien,
   initialStatistik,
   initialAutos,
+  initialLinks,
 }: OfficeViewProps) {
   const { toast } = useToast();
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
-  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos" | "rechner" | "meldung">("tabelle");
+  const [activeOfficeTab, setActiveOfficeTab] = useState<"tabelle" | "statistik" | "autos" | "rechner" | "meldung" | "links">("tabelle");
   const [statistikData, setStatistikData] = useState<LagerStatistikData | null>(initialStatistik || null);
   const [autosData, setAutosData] = useState<AutoItem[]>(initialAutos || []);
+  const [linksData, setLinksData] = useState<WebLinkItem[]>(initialLinks || []);
   const [isPending, startTransition] = useTransition();
 
   // Filter-Zustände
@@ -140,19 +145,29 @@ export function OfficeView({
     }
   }, [initialAutos]);
 
+  React.useEffect(() => {
+    if (initialLinks) {
+      setLinksData(initialLinks);
+    } else {
+      getWebLinks().then(setLinksData).catch(() => {});
+    }
+  }, [initialLinks]);
+
   // Daten neu laden (Live-Refresh)
   const handleReload = () => {
     startTransition(async () => {
       try {
-        const [freshMats, freshStat, freshAutos] = await Promise.all([
+        const [freshMats, freshStat, freshAutos, freshLinks] = await Promise.all([
           getMaterialien(),
           getLagerStatistik(),
           getAutos(),
+          getWebLinks(),
         ]);
         setMaterialien(freshMats);
         setStatistikData(freshStat);
         setAutosData(freshAutos);
-        toast("Bestands-, Statistik- und Fahrzeugdaten aktualisiert.");
+        setLinksData(freshLinks);
+        toast("Bestands-, Statistik-, Fahrzeug- und Linkdaten aktualisiert.");
       } catch (err) {
         toast("Fehler beim Aktualisieren der Daten.", "error");
       }
@@ -554,6 +569,30 @@ export function OfficeView({
 
           <button
             type="button"
+            onClick={() => setActiveOfficeTab("links")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+              activeOfficeTab === "links"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            <span>🌐 Wichtige Webseiten</span>
+            {linksData.length > 0 && (
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  activeOfficeTab === "links"
+                    ? "bg-white/20 text-white"
+                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300"
+                }`}
+              >
+                {linksData.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveOfficeTab("rechner")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
               activeOfficeTab === "rechner"
@@ -591,7 +630,9 @@ export function OfficeView({
         </button>
       </div>
 
-      {activeOfficeTab === "meldung" ? (
+      {activeOfficeTab === "links" ? (
+        <WebLinksView initialLinks={linksData} onLinksChanged={handleReload} />
+      ) : activeOfficeTab === "meldung" ? (
         <MeldungForm
           bereich="OFFICE"
           currentUserName="Office-Mitarbeiter"
