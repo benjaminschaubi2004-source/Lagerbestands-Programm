@@ -79,10 +79,11 @@ export function TechnikerClientPage({
                 type="button"
                 onClick={reloadData}
                 disabled={isPending}
-                className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                title="Aktualisieren"
+                className="px-2.5 py-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/70 dark:hover:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title="Bestände und Daten aktualisieren"
               >
-                <RefreshCw className={`w-4 h-4 ${isPending ? "animate-spin text-indigo-600" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${isPending ? "animate-spin text-indigo-600" : ""}`} />
+                <span>Aktualisieren</span>
               </button>
 
               <UserHeaderBadge currentUser={currentUser} targetRoleHint="TECHNIKER" />

@@ -501,34 +501,50 @@ export function TechnikerFinder({
                     </div>
 
                     {/* Kennzahlen (auf Mobile kompakt) */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                      <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
                           Mindestbestand
                         </span>
-                        <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                          <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 shrink-0" />
-                          <span className="text-xs sm:text-base font-semibold sm:font-bold text-zinc-800 dark:text-zinc-200">
+                        <div className="flex items-center gap-2 mt-1">
+                          <Layers className="w-4 h-4 text-zinc-400 shrink-0" />
+                          <span className="text-base font-bold text-zinc-800 dark:text-zinc-200">
                             {currentVariante.mindestbestand} {unitText}
                           </span>
                         </div>
                       </div>
 
+                      {/* Ist-Lagerbestand Box MIT prominentem Aktualisierungs-Button */}
                       <div
-                        className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border ${isBelowMin
+                        className={`p-3 rounded-xl border flex items-center justify-between gap-3 shadow-xs ${
+                          isBelowMin
                             ? "bg-red-50/80 dark:bg-red-950/40 border-red-300 dark:border-red-800"
-                            : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-800"
-                          }`}
+                            : "bg-indigo-50/60 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/80"
+                        }`}
                       >
-                        <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-                          Ist-Lagerbestand
-                        </span>
-                        <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                          <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
-                          <span className="text-xs sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
-                            {currentVariante.istBestand} {unitText}
+                        <div>
+                          <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">
+                            Ist-Lagerbestand
                           </span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Package className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                            <span className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100 font-mono">
+                              {currentVariante.istBestand} {unitText}
+                            </span>
+                          </div>
                         </div>
+
+                        {/* Sofortiger Aktualisierungs-Button direkt im Ist-Bestand-Feld */}
+                        <button
+                          type="button"
+                          onClick={handleAktualisieren}
+                          disabled={isBooking}
+                          className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer touch-manipulation shrink-0 active:scale-95"
+                          title="Ist-Bestand aktualisieren"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isBooking ? "animate-spin" : ""}`} />
+                          <span>Aktualisieren</span>
+                        </button>
                       </div>
                     </div>
 
@@ -536,7 +552,7 @@ export function TechnikerFinder({
                     <div className="space-y-3 pt-1 w-full">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 block">
-                          3. Artikelanzahl anpassen
+                          3. Artikelanzahl mit Plus / Minus anpassen
                         </label>
                         {targetBestand !== currentVariante.istBestand && (
                           <button
@@ -625,25 +641,28 @@ export function TechnikerFinder({
                         ))}
                       </div>
 
-                      {/* 4. AKTUALISIERUNGS-BUTTON */}
-                      <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      {/* 4. HAUPT-AKTUALISIERUNGS-BUTTON */}
+                      <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+                        <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider block text-center">
+                          4. Bestand speichern / aktualisieren:
+                        </span>
                         <button
                           type="button"
                           disabled={isBooking}
                           onClick={handleAktualisieren}
-                          className={`w-full min-h-[56px] sm:min-h-[52px] py-3 px-4 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
-                            targetBestand !== currentVariante.istBestand
-                              ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/30 ring-2 ring-indigo-400/50"
-                              : "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 dark:bg-zinc-700 dark:hover:bg-zinc-600"
-                          }`}
+                          className="w-full min-h-[56px] sm:min-h-[52px] py-3.5 px-4 rounded-xl font-extrabold text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98] border-2 border-blue-400/40"
                         >
                           <RefreshCw className={`w-5 h-5 shrink-0 ${isBooking ? "animate-spin" : ""}`} />
                           <span>
                             {isBooking
                               ? "Wird aktualisiert..."
                               : targetBestand !== currentVariante.istBestand
-                              ? `Ist-Bestand aktualisieren (${targetBestand} ${unitText})`
-                              : "Ist-Bestand aktualisieren"}
+                              ? `Ist-Bestand aktualisieren (${targetBestand} ${unitText} • ${
+                                  targetBestand > currentVariante.istBestand
+                                    ? `+${targetBestand - currentVariante.istBestand}`
+                                    : targetBestand - currentVariante.istBestand
+                                })`
+                              : `Ist-Bestand jetzt aktualisieren (${currentVariante.istBestand} ${unitText})`}
                           </span>
                         </button>
                       </div>
