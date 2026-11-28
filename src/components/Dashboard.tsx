@@ -19,6 +19,7 @@ import { StatistikView } from "./StatistikView";
 import { AutosView } from "./AutosView";
 import { AdminMeldungenView } from "./AdminMeldungenView";
 import { WebLinksView } from "./WebLinksView";
+import { OfficeView } from "./OfficeView";
 import { UserHeaderBadge } from "./UserHeaderBadge";
 import { AndroidAppView } from "./AndroidAppView";
 import { ToastProvider } from "./Toast";
@@ -40,6 +41,7 @@ import {
   Car,
   MessageSquare,
   Globe,
+  Building2,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -68,7 +70,7 @@ export function Dashboard({
   isAdmin = true,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "materialien" | "statistik" | "autos" | "meldungen" | "links" | "groessen" | "users" | "logs" | "techniker" | "apk"
+    "materialien" | "statistik" | "autos" | "meldungen" | "links" | "groessen" | "users" | "logs" | "techniker" | "office" | "apk"
   >("materialien");
 
   const [materialien, setMaterialien] = useState<MaterialWithVarianten[]>(initialMaterialien);
@@ -354,8 +356,21 @@ export function Dashboard({
                     : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
               >
-                <Wrench className="w-4 h-4" />
+                <Wrench className="w-4 h-4 text-emerald-500" />
                 <span>Monteur-Vorschau</span>
+              </button>
+
+              {/* 8. Tab: Office-Vorschau */}
+              <button
+                onClick={() => setActiveTab("office")}
+                className={`flex items-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors cursor-pointer shrink-0 ${
+                  activeTab === "office"
+                    ? "border-violet-600 text-violet-600 dark:text-violet-400 font-bold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-blue-500" />
+                <span>Office-Vorschau</span>
               </button>
 
               {/* 6. Tab: Android App Download (NEU) */}
@@ -407,6 +422,13 @@ export function Dashboard({
             <UserManager initialUsers={users} onChanged={reloadData} />
           ) : activeTab === "logs" ? (
             <ActivityLogView initialLogs={logs} onLogsCleared={reloadData} />
+          ) : activeTab === "office" ? (
+            <OfficeView
+              materialien={materialien}
+              initialStatistik={statistik}
+              initialAutos={autos}
+              initialLinks={links}
+            />
           ) : activeTab === "apk" ? (
             <AndroidAppView />
           ) : (
