@@ -26,6 +26,8 @@ import {
   Trash2,
   Car,
   Ruler,
+  RefreshCw,
+  RotateCcw,
 } from "lucide-react";
 import { useToast } from "./Toast";
 import { VarianteModal } from "./VarianteModal";
@@ -90,7 +92,7 @@ export function TechnikerFinder({
     return materialien.length > 0 ? materialien[0].id : null;
   });
   const [selectedVarianteId, setSelectedVarianteId] = useState<number | null>(null);
-  const [menge, setMenge] = useState(1);
+  const [targetBestand, setTargetBestand] = useState<number>(0);
   const [isBooking, setIsBooking] = useState(false);
   const [isAddVarianteOpen, setIsAddVarianteOpen] = useState(false);
   const [isAddMaterialOpen, setIsAddMaterialOpen] = useState(false);
@@ -129,53 +131,74 @@ export function TechnikerFinder({
     return currentMaterial.varianten;
   }, [currentMaterial]);
 
-    // Synchronisiere ausgewählte Variante wenn Material wechselt
-    useEffect(() => {
-      if (availableVarianten.length > 0) {
-        const stillValid = availableVarianten.some((v) => v.id === selectedVarianteId);
-        if (!stillValid) {
-          setSelectedVarianteId(availableVarianten[0].id);
-        }
-      } else {
-        setSelectedVarianteId(null);
+  // Synchronisiere ausgewählte Variante wenn Material wechselt
+  useEffect(() => {
+    if (availableVarianten.length > 0) {
+      const stillValid = availableVarianten.some((v) => v.id === selectedVarianteId);
+      if (!stillValid) {
+        setSelectedVarianteId(availableVarianten[0].id);
       }
-    }, [selectedMaterialId, availableVarianten]);
+    } else {
+      setSelectedVarianteId(null);
+    }
+  }, [selectedMaterialId, availableVarianten]);
 
-    // Finde die aktive Variante direkt über ID
-    const currentVariante = useMemo(() => {
-      if (!availableVarianten.length) return null;
-      return availableVarianten.find((v) => v.id === selectedVarianteId) || availableVarianten[0] || null;
-    }, [availableVarianten, selectedVarianteId]);
+  // Finde die aktive Variante direkt über ID
+  const currentVariante = useMemo(() => {
+    if (!availableVarianten.length) return null;
+    return availableVarianten.find((v) => v.id === selectedVarianteId) || availableVarianten[0] || null;
+  }, [availableVarianten, selectedVarianteId]);
 
-    const isKleinkram =
-      currentMaterial?.kategorie === "SCHRAUBEN_KLEINKRAM" || currentMaterial?.einheit === "Pakete";
-    const unitText = isKleinkram ? "Pakete" : "Stk.";
-    const unitSingular = isKleinkram ? "Paket" : "Stk.";
+  // Synchronisiere targetBestand wenn aktuelle Variante wechselt oder deren Bestand aktualisiert wird
+  useEffect(() => {
+    if (currentVariante) {
+      setTargetBestand(currentVariante.istBestand);
+    }
+  }, [currentVariante?.id, currentVariante?.istBestand]);
 
-    const handleBooking = async (typ: "ausgabe" | "einnahme") => {
-      if (!currentVariante || menge <= 0) return;
-        try {
-          setIsBooking(true);
-          const res = onCustomBook
-            ? await onCustomBook(currentVariante.id, menge, typ)
-            : await bookBestand(currentVariante.id, menge, typ);
-          if (res.success) {
-            const actionText = typ === "ausgabe" ? "Ausgabe verbucht" : "Eingang verbucht";
-            const bookingUnit = isKleinkram ? (menge === 1 ? "Paket" : "Pakete") : "Stk.";
-            toast(
-              `${actionText}: ${menge} ${bookingUnit}. Neuer Lagerbestand: ${res.neuerBestand} ${bookingUnit}`
-            );
-            setMenge(1);
-            onDataChanged();
-          } else {
-            toast(res.error || "Fehler beim Buchen", "error");
-          }
-        } catch (err: any) {
-          toast("Fehler: " + (err?.message || "Buchung konnte nicht abgeschlossen werden"), "error");
-        } finally {
-          setIsBooking(false);
-        }
-      };
+  const isKleinkram =
+    currentMaterial?.kategorie === "SCHRAUBEN_KLEINKRAM" || currentMaterial?.einheit === "Pakete";
+  const unitText = isKleinkram ? "Pakete" : "Stk.";
+  const unitSingular = isKleinkram ? "Paket" : "Stk.";
+
+  // Aktualisierungs-Handler: Übernimmt den neuen Ist-Bestand (per Minus verringert oder Plus erhöht)
+  const handleAktualisieren = async () => {
+    if (!currentVariante) return;
+
+    const diff = targetBestand - currentVariante.istBestand;
+
+    // Wenn keine Änderung vorgenommen wurde: Daten neu laden / bestätigen
+    if (diff === 0) {
+      toast(`Lagerbestand ist aktuell (${currentVariante.istBestand} ${unitText}).`);
+      onDataChanged();
+      return;
+    }
+
+    const menge = Math.abs(diff);
+    const typ = diff < 0 ? "ausgabe" : "einnahme";
+
+    try {
+      setIsBooking(true);
+      const res = onCustomBook
+        ? await onCustomBook(currentVariante.id, menge, typ)
+        : await bookBestand(currentVariante.id, menge, typ);
+
+      if (res.success) {
+        const actionText = typ === "ausgabe" ? "Ausgabe verbucht" : "Bestand erhöht";
+        const bookingUnit = isKleinkram ? (menge === 1 ? "Paket" : "Pakete") : "Stk.";
+        toast(
+          `${actionText}: ${diff > 0 ? `+${menge}` : `-${menge}`} ${bookingUnit}. Neuer Lagerbestand: ${res.neuerBestand} ${bookingUnit}`
+        );
+        onDataChanged();
+      } else {
+        toast(res.error || "Fehler beim Aktualisieren des Bestands", "error");
+      }
+    } catch (err: any) {
+      toast("Fehler: " + (err?.message || "Bestand konnte nicht aktualisiert werden"), "error");
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
       const isBelowMin =
       currentVariante && currentVariante.istBestand <= currentVariante.mindestbestand;
@@ -509,94 +532,121 @@ export function TechnikerFinder({
                       </div>
                     </div>
 
-                    {/* Mengenauswahl */}
-                    <div className="space-y-2 pt-1 w-full">
-                      <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 block">
-                        3. Menge wählen
-                      </label>
+                    {/* 3. Artikelanzahl / Ist-Bestand anpassen */}
+                    <div className="space-y-3 pt-1 w-full">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 block">
+                          3. Artikelanzahl anpassen
+                        </label>
+                        {targetBestand !== currentVariante.istBestand && (
+                          <button
+                            type="button"
+                            onClick={() => setTargetBestand(currentVariante.istBestand)}
+                            className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Auf aktuellen Lagerbestand zurücksetzen"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Zurücksetzen ({currentVariante.istBestand})</span>
+                          </button>
+                        )}
+                      </div>
 
-                      <div className="flex items-center gap-2 w-full max-w-full">
+                      {/* Plus und Minus Steuerung */}
+                      <div className="flex items-center gap-2 sm:gap-3 w-full">
+                        {/* MINUS BUTTON */}
                         <button
                           type="button"
-                          onClick={() => setMenge((prev) => Math.max(1, prev - 1))}
-                          className="min-h-[48px] h-12 w-12 sm:w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation shrink-0"
-                          title="Menge verringern"
+                          onClick={() => setTargetBestand((prev) => Math.max(0, prev - 1))}
+                          disabled={targetBestand <= 0 || isBooking}
+                          className="min-h-[56px] h-14 w-14 sm:w-16 rounded-2xl bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 active:bg-rose-200 text-rose-700 dark:text-rose-300 border-2 border-rose-200 dark:border-rose-900 font-extrabold text-2xl flex items-center justify-center transition-all cursor-pointer touch-manipulation shrink-0 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs active:scale-95"
+                          title="Bestand verringern (-1)"
                         >
-                          <Minus className="w-5 h-5" />
+                          <Minus className="w-6 h-6" />
                         </button>
 
-                        <input
-                          type="number"
-                          min="1"
-                          value={menge}
-                          onChange={(e) => setMenge(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="flex-1 min-w-0 w-full min-h-[48px] h-12 text-center text-xl font-bold border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 touch-manipulation"
-                        />
+                        {/* ANZEIGE & DIREKTE EINGABE */}
+                        <div className="flex-1 min-w-0 flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border-2 border-zinc-200 dark:border-zinc-700 focus-within:border-indigo-500 dark:focus-within:border-indigo-500 transition-colors">
+                          <div className="flex items-baseline justify-center gap-1.5 w-full">
+                            <input
+                              type="number"
+                              min="0"
+                              value={targetBestand}
+                              onChange={(e) => setTargetBestand(Math.max(0, parseInt(e.target.value) || 0))}
+                              className="w-full text-center text-2xl sm:text-3xl font-extrabold bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-hidden touch-manipulation font-mono"
+                            />
+                            <span className="text-xs sm:text-sm font-bold text-zinc-500 shrink-0">
+                              {unitText}
+                            </span>
+                          </div>
 
+                          {/* Status-Differenz-Hinweis */}
+                          <div className="text-[11px] font-semibold mt-0.5">
+                            {targetBestand === currentVariante.istBestand ? (
+                              <span className="text-zinc-400">Aktueller Bestand</span>
+                            ) : targetBestand < currentVariante.istBestand ? (
+                              <span className="text-rose-600 dark:text-rose-400 font-bold">
+                                {targetBestand - currentVariante.istBestand} {unitText} (Entnahme)
+                              </span>
+                            ) : (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                                +{targetBestand - currentVariante.istBestand} {unitText} (Erhöhung)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* PLUS BUTTON */}
                         <button
                           type="button"
-                          onClick={() => setMenge((prev) => prev + 1)}
-                          className="min-h-[48px] h-12 w-12 sm:w-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xl flex items-center justify-center hover:bg-zinc-200 active:bg-zinc-300 transition-colors cursor-pointer touch-manipulation shrink-0"
-                          title="Menge erhöhen"
+                          onClick={() => setTargetBestand((prev) => prev + 1)}
+                          disabled={isBooking}
+                          className="min-h-[56px] h-14 w-14 sm:w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 active:bg-emerald-200 text-emerald-700 dark:text-emerald-300 border-2 border-emerald-200 dark:border-emerald-900 font-extrabold text-2xl flex items-center justify-center transition-all cursor-pointer touch-manipulation shrink-0 shadow-xs active:scale-95"
+                          title="Bestand erhöhen (+1)"
                         >
-                          <Plus className="w-5 h-5" />
+                          <Plus className="w-6 h-6" />
                         </button>
                       </div>
 
-                      {/* Schnellauswahl Buttons */}
-                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-1 w-full">
-                        {[1, 2, 5, 10].map((step) => (
+                      {/* Schnellauswahl-Schritte */}
+                      <div className="flex items-center justify-center gap-1.5 sm:gap-2 pt-0.5 flex-wrap">
+                        {[-5, -1, 1, 5].map((delta) => (
                           <button
-                            key={step}
+                            key={delta}
                             type="button"
-                            onClick={() => setMenge(step)}
-                            className={`min-h-[40px] py-1 px-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer touch-manipulation text-center ${
-                              menge === step
-                                ? "bg-indigo-100 dark:bg-indigo-950 border-indigo-400 text-indigo-700 dark:text-indigo-300 font-extrabold ring-1 ring-indigo-400"
-                                : "bg-zinc-50 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 active:bg-zinc-200"
+                            onClick={() => setTargetBestand((prev) => Math.max(0, prev + delta))}
+                            className={`py-1 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer touch-manipulation ${
+                              delta < 0
+                                ? "bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
+                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
                             }`}
                           >
-                            {step} {isKleinkram ? (step === 1 ? "Paket" : "Pakete") : "Stk."}
+                            {delta > 0 ? `+${delta}` : delta} {unitText}
                           </button>
                         ))}
                       </div>
-                    </div>
 
-                    {/* 4. Buchungs-Aktionen: Entnehmen (Ausgabe) oder Einlagern (Einnahme) - Auf Mobile größer & griffiger */}
-                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-2 gap-2.5 sm:gap-3">
-                      {/* AUSGABE */}
-                      <button
-                        type="button"
-                        disabled={isBooking || currentVariante.istBestand <= 0}
-                        onClick={() => handleBooking("ausgabe")}
-                        className="min-h-[66px] sm:min-h-[56px] py-2.5 sm:py-2 px-3 rounded-xl font-bold text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
-                      >
-                        <div className="flex items-center gap-1.5 font-extrabold text-base sm:text-sm">
-                          <ArrowDownCircle className="w-5 h-5" />
-                          <span>Ausgabe</span>
-                        </div>
-                        <span className="text-xs sm:text-[11px] font-normal opacity-95">
-                          {currentVariante.istBestand <= 0
-                            ? "Kein Bestand"
-                            : `${menge} ${menge === 1 ? unitSingular : unitText} entnehmen`}
-                        </span>
-                      </button>
-
-                      {/* EINNAHME */}
-                      <button
-                        type="button"
-                        disabled={isBooking}
-                        onClick={() => handleBooking("einnahme")}
-                        className="min-h-[66px] sm:min-h-[56px] py-2.5 sm:py-2 px-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.98] disabled:opacity-50 transition-all shadow-md flex flex-col items-center justify-center gap-0.5 cursor-pointer touch-manipulation"
-                      >
-                        <div className="flex items-center gap-1.5 font-extrabold text-base sm:text-sm">
-                          <ArrowUpCircle className="w-5 h-5" />
-                          <span>Einnahme</span>
-                        </div>
-                        <span className="text-xs sm:text-[11px] font-normal opacity-95">
-                          {menge} {menge === 1 ? unitSingular : unitText} einlagern
-                        </span>
-                      </button>
+                      {/* 4. AKTUALISIERUNGS-BUTTON */}
+                      <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                        <button
+                          type="button"
+                          disabled={isBooking}
+                          onClick={handleAktualisieren}
+                          className={`w-full min-h-[56px] sm:min-h-[52px] py-3 px-4 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
+                            targetBestand !== currentVariante.istBestand
+                              ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/30 ring-2 ring-indigo-400/50"
+                              : "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                          }`}
+                        >
+                          <RefreshCw className={`w-5 h-5 shrink-0 ${isBooking ? "animate-spin" : ""}`} />
+                          <span>
+                            {isBooking
+                              ? "Wird aktualisiert..."
+                              : targetBestand !== currentVariante.istBestand
+                              ? `Ist-Bestand aktualisieren (${targetBestand} ${unitText})`
+                              : "Ist-Bestand aktualisieren"}
+                          </span>
+                        </button>
+                      </div>
                     </div>
             </div>
           )}
